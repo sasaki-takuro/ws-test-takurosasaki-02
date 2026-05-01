@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>統合25ユースケース｜業務課題×AI解決策マトリクス</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f1ea;
+  --bg-paper: #fbf9f4;
+  --ink: #1a1f2e;
+  --ink-soft: #3d4556;
+  --ink-mute: #6b7280;
+  --line: #d8d2c2;
+  --line-soft: #e8e3d5;
+  --accent: #b8543d;
+  --accent-dark: #8b3d2a;
+  --gold: #b8893f;
+  --chat: #2563a8;
+  --agent: #7a3e9d;
+  --rag: #2d7a4f;
+  --chat-bg: #e8eef7;
+  --agent-bg: #efe7f4;
+  --rag-bg: #e4efe7;
+  --sans: "Noto Sans JP", -apple-system, sans-serif;
+  --serif: "Noto Serif JP", "Yu Mincho", serif;
+  --mono: "JetBrains Mono", monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.7;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ------ レイアウト ------ */
+.app {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+}
+
+/* ------ ヘッダー ------ */
+.header {
+  background: var(--ink);
+  color: var(--bg-paper);
+  padding: 16px 28px;
+  border-bottom: 3px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.header-left { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.header-title {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.header-title .accent { color: var(--accent); }
+.header-sub {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: #a8a5a0;
+  text-transform: uppercase;
+  font-family: var(--mono);
+}
+.header-stats {
+  display: flex;
+  gap: 0;
+  font-size: 11px;
+}
+.stat {
+  padding: 4px 16px;
+  border-left: 1px solid #3a4050;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 72px;
+}
+.stat:last-child { border-right: 1px solid #3a4050; }
+.stat-num {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--bg-paper);
+  line-height: 1;
+}
+.stat-lbl {
+  font-size: 10px;
+  color: #a8a5a0;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+/* ------ メイン ------ */
+.main {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* ------ サイドバー ------ */
+.sidebar {
+  background: var(--bg-paper);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-head {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--bg-paper);
+}
+.search-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+.search {
+  width: 100%;
+  padding: 10px 12px 10px 34px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink);
+  border-radius: 2px;
+  transition: border-color 0.15s;
+}
+.search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-mute);
+  pointer-events: none;
+}
+.filter-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-size: 11px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.15s;
+  font-family: var(--sans);
+  white-space: nowrap;
+}
+.chip:hover { border-color: var(--ink-soft); }
+.chip.active {
+  background: var(--ink);
+  color: var(--bg-paper);
+  border-color: var(--ink);
+}
+.chip .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+.sidebar-list::-webkit-scrollbar { width: 8px; }
+.sidebar-list::-webkit-scrollbar-track { background: transparent; }
+.sidebar-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+.sidebar-list::-webkit-scrollbar-thumb:hover { background: var(--ink-mute); }
+
+.group-header {
+  padding: 12px 20px 6px;
+  font-family: var(--serif);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--ink-mute);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.uc-item {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
+  transition: all 0.12s;
+  border-left: 3px solid transparent;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.uc-item:hover {
+  background: #fff;
+  border-left-color: var(--gold);
+}
+.uc-item.active {
+  background: #fff;
+  border-left-color: var(--accent);
+}
+.uc-no {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1;
+  min-width: 28px;
+  padding-top: 2px;
+}
+.uc-item.active .uc-no { color: var(--accent-dark); }
+.uc-body { flex: 1; min-width: 0; }
+.uc-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+.uc-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.uc-pattern {
+  font-size: 10px;
+  color: var(--ink-mute);
+  font-family: var(--mono);
+}
+.fit-marks {
+  display: inline-flex;
+  gap: 3px;
+  margin-left: auto;
+}
+.fit-pill {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.fit-pill.chat { background: var(--chat-bg); color: var(--chat); }
+.fit-pill.agent { background: var(--agent-bg); color: var(--agent); }
+.fit-pill.rag { background: var(--rag-bg); color: var(--rag); }
+.fit-pill.dim { opacity: 0.3; }
+
+.no-results {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-mute);
+  font-size: 12px;
+}
+
+/* ------ メインビュー ------ */
+.content {
+  overflow-y: auto;
+  background: var(--bg);
+  position: relative;
+}
+.content::-webkit-scrollbar { width: 10px; }
+.content::-webkit-scrollbar-track { background: var(--bg); }
+.content::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
+
+.view-tabs {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 32px 0;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+.vtab {
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mute);
+  transition: all 0.15s;
+}
+.vtab:hover { color: var(--ink); }
+.vtab.active {
+  color: var(--accent-dark);
+  border-bottom-color: var(--accent);
+}
+
+/* ------ 詳細ビュー ------ */
+.detail {
+  padding: 32px 40px 60px;
+  max-width: 1100px;
+  display: none;
+}
+.detail.active { display: block; animation: fadeUp 0.35s ease; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.detail-head {
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.breadcrumb {
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.08em;
+  font-family: var(--mono);
+  margin-bottom: 10px;
+}
+.breadcrumb .sep { margin: 0 8px; opacity: 0.5; }
+.detail-no {
+  font-family: var(--serif);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.detail-title {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+  margin-bottom: 16px;
+}
+.detail-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  background: var(--bg-paper);
+  color: var(--ink-soft);
+  border-radius: 2px;
+  font-weight: 500;
+}
+.badge.track { border-color: var(--gold); color: var(--gold); }
+.badge.cat {
+  background: var(--ink);
+  color: var(--bg-paper);
+  border-color: var(--ink);
+}
+
+/* 2カラムセクション */
+.section-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+@media (max-width: 900px) {
+  .section-2col { grid-template-columns: 1fr; }
+}
+.card {
+  background: var(--bg-paper);
+  border: 1px solid var(--line);
+  padding: 22px 24px;
+  border-radius: 2px;
+  position: relative;
+}
+.card-label {
+  font-family: var(--serif);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--ink-mute);
+  margin-bottom: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-label::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--accent);
+}
+.card h3 {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+.card-body {
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: var(--ink-soft);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.card.issue { border-left: 3px solid #a04040; }
+.card.tobe { border-left: 3px solid #3d7a5a; }
+
+/* ソリューション比較セクション */
+.solutions {
+  margin-bottom: 32px;
+}
+.sec-title {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.sec-title .sec-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+}
+.sol-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 1100px) { .sol-grid { grid-template-columns: 1fr; } }
+
+.sol-card {
+  background: var(--bg-paper);
+  border: 1px solid var(--line);
+  padding: 20px 22px;
+  border-radius: 2px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.sol-card .sol-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--line);
+}
+.sol-name {
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 600;
+}
+.sol-type {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink-mute);
+  margin-top: 2px;
+}
+.sol-fit {
+  font-size: 22px;
+  font-family: var(--serif);
+  font-weight: 700;
+  line-height: 1;
+}
+.sol-fit.excellent { color: var(--accent); }
+.sol-fit.good { color: var(--gold); }
+.sol-fit.okay { color: var(--ink-mute); }
+.sol-fit.poor { color: #999; opacity: 0.5; }
+.sol-fit-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.sol-card.chat { border-top: 3px solid var(--chat); }
+.sol-card.agent { border-top: 3px solid var(--agent); }
+.sol-card.rag { border-top: 3px solid var(--rag); }
+
+.sol-body {
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  flex: 1;
+}
+.sol-area {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.05em;
+}
+.sol-area strong {
+  color: var(--ink-soft);
+  font-weight: 500;
+  margin-left: 6px;
+}
+
+/* メタ情報 */
+.meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  background: var(--bg-paper);
+  border: 1px solid var(--line);
+  padding: 20px 24px;
+  border-radius: 2px;
+}
+@media (max-width: 700px) { .meta-grid { grid-template-columns: 1fr; } }
+.meta-item {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.meta-item dt {
+  font-family: var(--serif);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.meta-item dd {
+  color: var(--ink-soft);
+}
+
+/* ------ マトリクスビュー ------ */
+.matrix-view {
+  padding: 32px 40px 60px;
+  display: none;
+}
+.matrix-view.active { display: block; }
+
+.matrix-intro {
+  margin-bottom: 20px;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.matrix-wrap {
+  background: var(--bg-paper);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  overflow: auto;
+}
+table.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 900px;
+}
+.matrix thead th {
+  background: var(--ink);
+  color: var(--bg-paper);
+  padding: 12px 10px;
+  text-align: left;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  border-right: 1px solid #3a4050;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  white-space: nowrap;
+}
+.matrix thead th.center { text-align: center; }
+.matrix tbody td {
+  padding: 10px;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.matrix tbody td.center { text-align: center; }
+.matrix tbody tr {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.matrix tbody tr:hover { background: #fff; }
+.matrix tbody tr.active { background: #fff5ef; }
+.mat-no {
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--accent);
+}
+.mat-name { font-weight: 500; color: var(--ink); }
+.mat-pattern {
+  font-size: 10px;
+  color: var(--ink-mute);
+  font-family: var(--mono);
+}
+.fit-cell {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+}
+.fit-cell.excellent { color: var(--accent); }
+.fit-cell.good { color: var(--gold); }
+.fit-cell.poor { color: #bbb; }
+
+/* ------ ウェルカム ------ */
+.welcome {
+  padding: 80px 60px;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  display: none;
+}
+.welcome.active { display: block; }
+.welcome-mark {
+  font-family: var(--serif);
+  font-size: 56px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.welcome h2 {
+  font-family: var(--serif);
+  font-size: 24px;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+.welcome p {
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+/* ------ レスポンシブ ------ */
+.hamburger { display: none; }
+@media (max-width: 900px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 85%;
+    max-width: 380px;
+    transform: translateX(-100%);
+    transition: transform 0.25s;
+    z-index: 100;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.2);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    background: transparent;
+    border: 1px solid var(--bg-paper);
+    color: var(--bg-paper);
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .detail, .matrix-view { padding: 20px; }
+  .detail-title { font-size: 22px; }
+  .header-stats { display: none; }
+}
+
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 99;
+}
+.backdrop.show { display: block; }
+
+/* 強調モード */
+::selection { background: var(--accent); color: white; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="header-left">
+      <button class="hamburger" id="hamburger" aria-label="menu">☰</button>
+      <div>
+        <div class="header-sub">INTEGRATED CASEBOOK</div>
+        <h1 class="header-title">統合25ユースケース <span class="accent">×</span> AI解決策マトリクス</h1>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="stat"><div class="stat-num" id="stat-total">25</div><div class="stat-lbl">USE CASES</div></div>
+      <div class="stat"><div class="stat-num" id="stat-pattern">9</div><div class="stat-lbl">PATTERNS</div></div>
+      <div class="stat"><div class="stat-num" id="stat-visible">25</div><div class="stat-lbl">VISIBLE</div></div>
+    </div>
+  </header>
+
+  <div class="main">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <div class="search-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" class="search" id="search" placeholder="キーワードで検索（名前・課題・解決策）">
+        </div>
+        <div class="filter-row" id="filters"></div>
+      </div>
+      <div class="sidebar-list" id="list"></div>
+    </aside>
+
+    <main class="content">
+      <nav class="view-tabs">
+        <button class="vtab active" data-view="detail">■ 詳細ビュー</button>
+        <button class="vtab" data-view="matrix">▦ 一覧マトリクス</button>
+      </nav>
+
+      <div class="welcome active" id="welcome">
+        <div class="welcome-mark">◇</div>
+        <h2>ユースケースを選択してください</h2>
+        <p>左のサイドバーから、気になるユースケースをクリックすると<br>課題・あるべき姿・3種のAI解決策（Chat／Agent／RAG）の<br>詳細を閲覧できます。上の「一覧マトリクス」で全件俯瞰も可能です。</p>
+      </div>
+
+      <section class="detail" id="detail"></section>
+      <section class="matrix-view" id="matrix"></section>
+    </main>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+
+<script>
+const DATA = [{"no": 1, "name": "案件概要資料の要点抽出と標準化", "pattern": "A. 投資・買収（ソーシング）", "track": "中上級", "efficiency": "●", "analysis": "●", "strategy": "", "issue": "・仲介会社から届く案件概要資料はフォーマットや粒度がまちまちで、重要情報（業績推移、主要KPI、契約条件、リスク要因など）を手作業で拾っている。\n・非編集形式（PDF・スキャン画像）の資料が全体の約7割を占め、定量/定性情報の抜き出しと整理に1件あたり2〜3時間を要している。\n・評価に必要な論点（企業情報・財務概要・拠点構成・人員体制・リスク・取引条件）の抜け漏れが起きやすく、比較可能な形に整えるまで手戻りが発生する。\n・担当者の経験差により抽出品質にばらつきがあり、ベテランと若手で見落とし率が異なる。", "tobe": "仲介会社から届く案件概要資料（フォーマット・粒度バラバラ）が、AIに投入するだけで企業情報・財務概要・拠点構成・人員体制・リスク・取引条件の6カテゴリに自動分類され、JSON形式で標準化出力される。過去案件との比較による不足情報の自動指摘も行われ、再利用可能な抽出パイプラインが確立。担当者の経験差に依存しない均質な情報整理が実現し、1件あたり2〜3時間→30分以内に短縮。分析・判断に集中できる状態。", "group": "A. 投資・買収（起案・DD・ソーシング）", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "◎", "chat_sol": "【到達率40%】Claude Sonnetに過去案件PDF2件（A社:表形式中心/B社:テキスト主体）を添付し<この2件に共通する重要項目のパターンを抽出して、6カテゴリ（企業情報/財務/拠点/人員/リスク/取引条件）で整理して>と指示→構造化された項目リスト取得。新規PDFを渡し<先ほどのパターンで要点を整理して。JSON形式で出力して>と指示。CopilotよりPDF読取精度が大幅に高く、表形式データも正確に認識。JSON出力も直接可能。ただし45分で2件が限界（Proプランのトークン消費に注意）。Claude Codeとの差はCLAUDE.mdによるパターン再利用性。\n【演習】ダミーPDF2件→パターン抽出→新規PDF1件に適用→JSON出力。", "chat_area": "業務効率化・データ分析", "agent_sol": "【到達率65%】Step1（10分）: GitHubリポジトリに過去案件PDF3件（A社:表形式中心5頁/B社:テキスト+表混在8頁/C社:社内メモ風3頁）をアップロード。Sonnetに<この3件のPDFを読み比べて、共通する重要項目のパターンを抽出し、CLAUDE.mdに抽出テンプレート（6カテゴリ：企業情報/財務概要/拠点構成/人員体制/リスク/取引条件、各カテゴリの抽出項目名と期待フォーマット）として定義してください。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新規案件PDF1件を追加アップロードし<CLAUDE.mdの抽出テンプレートに従ってこのPDFから情報を抽出し、結果を1つのMarkdownファイル『抽出結果_[案件名]_人間向け.md』として保存してください。ファイル内に①6カテゴリ別の抽出結果を表形式で、②過去3件との比較サマリを簡潔に含めてください。Pythonスクリプトは作成しないでください>と指示。出力は1ファイルに統合するため32kトークン制限内に収まる。到達率65%の内訳：6カテゴリ中4カテゴリは高精度抽出、残り2カテゴリ（リスク・取引条件の細目）は部分的な抽出にとどまる。45分で完了を実証済み。\n【演習】ダミーPDF3件→CLAUDE.mdにパターン定義→新規PDF1件に適用→抽出結果MDで精度確認。", "agent_area": "業務効率化・データ分析", "rag_sol": "【到達率55%】過去案件PDF3件をNotebookLMにアップし<この3つの資料に共通する重要項目を整理してください>と質問→引用付きで6カテゴリの構造を抽出。新規PDF追加で<過去3件と比べて不足している情報は何ですか？>と差分検出。定性的な比較分析に強く、引用元明示で根拠確認が容易。ただし標準化出力やパイプライン構築は不可。45分で十分完了。※今回は参考情報。\n【演習】ダミーPDF3件→パターン抽出→新規1件の差分分析。", "rag_area": "業務効率化・データ分析", "industry": "店舗出店申請書（RT） / 食品会社取締役会資料（FD） / 薬局案件概要（HC）", "mapping": "HC-1 / FD-11 / AD-4 / RT-21"}, {"no": 2, "name": "投資候補ロングリスト作成・スコアリング", "pattern": "A. 投資・買収（ソーシング）", "track": "中上級", "efficiency": "", "analysis": "●", "strategy": "●", "issue": "・投資候補のロングリスト作成において、地域・売上規模・従業員数・業種等の複数軸での分類と比較を手作業＋Excelで行っており、探索範囲と品質が担当者依存。\n・過去に投資/見送りの判定を行った候補データ（約50〜100件）は存在するが、判定ロジック（どの軸をどう重み付けしたか）が文書化されていない。\n・データ更新のたびに同じ分析を繰り返す非効率があり、再利用可能なスコアリングモデルとして整備したい。\n・公開情報（財務指標・運営指標）の収集も人手頼みで更新が追いつかない。", "tobe": "過去の投資判定データ（投資/見送りの実績付き、50〜100件規模）から抽出されたスコアリングロジック（重み付け・閾値・合否基準）が再利用可能なモデルとして確立。新規候補を入力すると多軸分類（地域・規模・業種・財務指標）とスコアリングが自動実行され、ランキングが即座に出力。候補のランキングが常に最新状態で維持される体制。", "group": "A. 投資・買収（起案・DD・ソーシング）", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "○", "chat_sol": "【到達率35%】Claude Sonnetに過去評価Excel2件（各20件、投資/見送り判定付き）を添付し<投資/見送りのパターンを分析し、スコアリング軸と合否基準を抽出して>と指示→構造化された基準取得。新規候補CSV（20件）で<この基準でスコアリングしてMarkdown表で出力して>と指示。Copilotより大量データ処理が高速で、30件程度まで対応可能。ただし50件超はClaude Codeの方が安定。\n【演習】ダミー評価Excel2件→基準抽出→新規30件に適用。", "chat_area": "データ分析・事業構想", "agent_sol": "【到達率70%】Step1（10分）: GitHubに過去投資評価データCSV（5件、列：企業名/地域/売上/従業員数/業種/利益率/投資判定/判定理由）をアップロード。<このCSVの投資/見送りパターンを分析し、スコアリングロジック（評価軸・重み付け・閾値）をCLAUDE.mdに定義してください。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新規候補CSV（5件、判定なし）を追加し<CLAUDE.mdのスコアリングロジックで各候補をスコアリングし、1つのMarkdownファイル『スコアリング結果_[案件名]_人間向け.md』として保存してください。ファイル内に①ランキング表（スコア・判定3段階・根拠）、②過去5件との比較サマリを含めてください。Pythonスクリプトは作成しないでください>と指示。5件規模は実務ではイメージしにくいが、パターン抽出→適用の流れを体験するには十分で、Claude Codeデスクトップ版なら50件以上も処理可能と説明。到達率70%の内訳：主要4軸（地域・規模・利益率・業種）のスコアリングは高精度、定性面（成長性・経営リスク）は部分的。45分完了。\n【演習】ダミー評価済CSV5件→ロジック定義→新規5件のランキング出力。", "agent_area": "データ分析・事業構想", "rag_sol": "【到達率50%】過去投資評価レポート・投資委員会議事録3件をNotebookLMにアップし<投資に至った候補の共通特徴と、見送り理由のパターンは？>と質問。引用付きで判断ナレッジ取得。定量スコアリングは不可だが定性スクリーニングに有効。45分完了。※今回は参考情報。\n【演習】ダミー評価レポート3件→判断パターン→新規候補を定性評価。", "rag_area": "データ分析・事業構想", "industry": "リテイル投資先候補（RT） / 食品素材企業候補（FD） / クリニック候補（HC）", "mapping": "HC-2 / FD-13 / RT-24"}, {"no": 3, "name": "バリュエーション自動構築（DCFモデル生成・感度分析）", "pattern": "A. 投資・買収（DD）", "track": "中上級", "efficiency": "", "analysis": "●", "strategy": "●", "issue": "・企業価値算定の表計算モデルの雛形が整備されておらず、案件ごとにゼロベースで作成。1モデルの構築に8〜16時間。\n・PL/BS/CFの5〜10年計画とDCFモデル（WACC/IRR/NPV算出）の構築に毎回多大な工数がかかる。\n・前提条件の置き方（売上成長率/営業利益率/設備投資率/運転資本率等）が属人的で、感度分析のパターン（どのパラメータを±何%動かすか）も標準化されていない。\n・過去に作成したモデルの再利用が進まず、パラメータだけ変えれば使えるのに毎回作り直している。", "tobe": "過去の事業計画Excel（PL/BS/CF構成、実績付き）から抽出されたモデル構築ロジック（売上前提の置き方、コスト構造のパターン、CF算出式、WACC前提、ターミナルバリュー計算方法）に基づき、パラメータ入力だけで5〜10年モデルが自動生成される。WACC/IRR/NPV算出と感度分析テーブル（主要3パラメータ×±5%/10%/20%）がワンステップで出力。構築時間8〜16時間→2時間以内に短縮。案件ごとのゼロベース構築が不要になっている状態。", "group": "A. 投資・買収（起案・DD・ソーシング）", "chat_fit": "△", "agent_fit": "◎", "rag_fit": "△", "chat_sol": "【到達率20%】Claude Sonnetに過去モデルExcel2件を添付し<PL構造・前提条件パターンを抽出して>と指示。Copilotより構造把握精度は高いが、DCFモデルの自動構築は処理能力の限界で不可。簡易PL叩き台にとどまる。複雑なモデル読解にはOpus推奨（トークン消費大）。\n【演習】ダミーモデルExcel2件→構造把握→簡易PL作成で限界を体感。", "chat_area": "データ分析", "agent_sol": "【到達率50%】Step1（10分）: GitHubに過去事業計画Excel3件（A社:PL/BS/CF/DCF完備3年/B社:PLとDCFのみ3年/C社:PLのみ3年、各件に前提条件シート付き、軽量構成）をアップロード。<3件を分析し、①PL構造ロジック（売上→原価→営業利益→純利益）、②DCFモデルの簡易構成（FCF算出→WACC適用→ターミナルバリュー→企業価値）、③感度分析パターン（主要パラメータ2つ×±10%/20%の4シナリオ）をCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新規案件のパラメータシート（売上前提/WACC前提/投資額、軽量版）を追加し<CLAUDE.mdのロジックで3年PL/DCFモデルと感度分析を作成し、1つのMarkdownファイル『DCFモデル_[案件名]_人間向け.md』として保存してください。WACC/IRR/NPV算出結果と感度分析テーブル、過去3件との比較を1ファイルに含めてください。Pythonスクリプトは作成しないでください>と指示。到達率50%：PL構造と基本DCF計算は妥当、BS連動・複雑な運転資本計算は対応不可で手動補正が前提。実測で45分超過しやすいため3年×軽量構成に縮小した。\n【演習】ダミー事業計画3件（3年・軽量）→ロジック定義→新規案件のDCF簡易版を作成。", "agent_area": "データ分析・事業構想", "rag_sol": "【到達率25%】過去モデル・投資委員会フィードバック3件をNotebookLMにアップし<前提条件で指摘されるポイントは？モデルの質が高い案件の特徴は？>と質問。モデル構築不可だが前提の妥当性確認に有効。45分完了。※今回は参考情報。\n【演習】ダミーモデル+フィードバック3件→指摘パターン→新規の前提チェック。", "rag_area": "データ分析", "industry": "小売事業DCF（RT） / 食品事業DCF（FD） / クリニック事業DCF（HC）", "mapping": "RT-26 / AD-6(構築側) / HC-4(試算側)"}, {"no": 4, "name": "DD（デューデリジェンス）の要点整理とチェックリスト照合", "pattern": "A. 投資・買収（DD）", "track": "中上級", "efficiency": "●", "analysis": "●", "strategy": "", "issue": "・財務/法務DDで受領するデータは提供元ごとに形式（PDF・Excel・画像）が異なり、必要情報の抽出に膨大な手間がかかる。1案件あたり受領資料は30〜50ファイル規模。\n・確認観点は買収形態（事業譲渡/株式取得等）ごとに類型化できるが、毎回ゼロから整理。過去DDの指摘パターン（頻出リスク・見落とし事例）が蓄積されていない。\n・報酬体系の組替え試算や仕入条件の改善インパクト算定など、反復計算が多い領域の自動化余地が大きい。\n・外部委託は費用増（1案件200〜500万円）、内製はスピード低下のジレンマ。", "tobe": "過去DDの指摘パターン（頻出リスク上位10項目・見落とし事例5件以上）がナレッジとして蓄積され、新規案件では過去指摘論点との照合が自動実行される。買収形態別チェックリスト（事業譲渡型:40項目/株式取得型:35項目等）が標準化。反復試算ロジック（報酬組替え・仕入改善・シナジー算定）が再利用可能な形で定義され、パラメータ変更で瞬時に再計算できる状態。外注費を抑えつつスピードも維持。", "group": "A. 投資・買収（起案・DD・ソーシング）", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "◎", "chat_sol": "【到達率35%】Claude Sonnetに過去DD報告書PDF2件（事業譲渡型/株式取得型各1件、各15頁）を添付し<確認観点パターンと頻出指摘を抽出し、チェックリスト形式で整理して>と指示→チェックリスト取得。新規資料で<このチェックリストで要点整理して>と指示。PDF読取精度がCopilotより高く、表・図表内の数値も認識可能。長大PDF（20頁超）はOpus推奨だがトークン消費大。\n【演習】ダミーDD報告書2件→チェックリスト→新規資料に適用。", "chat_area": "業務効率化・データ分析", "agent_sol": "【到達率65%】Step1（10分）: GitHubに過去DD報告書PDF3件（事業譲渡型2件/株式取得型1件、各5〜8頁、軽量版）をアップロード。<この3件のDD報告書を分析し、①買収形態別の共通確認観点（チェック項目と確認ポイント）、②頻出リスク指摘パターン上位10項目、③試算で使われている前提条件のパターンをCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新規案件DD資料1件を追加し<CLAUDE.mdのチェックリストで要点整理し、1つのMarkdownファイル『DD要点整理_[案件名]_人間向け.md』として保存してください。項目ごとに確認済/情報不足/リスクありの3段階判定、過去3件の指摘パターンとの照合結果を1ファイルに含めてください。Pythonスクリプトは作成しないでください>と指示。到達率65%：定性論点抽出は高精度、試算ロジック自動適用は部分的。45分完了。\n【演習】ダミーDD資料3件→パターン定義→新規1件の自動チェック。", "agent_area": "業務効率化・データ分析", "rag_sol": "【到達率55%】過去DD報告書・ガイドライン・指摘事例集3件をNotebookLMにアップし<DDで繰り返し指摘される論点上位10項目とその背景は？>と質問。引用付き類型化リスト取得。新規資料追加で差分検出。論点網羅性確認に有効。試算自動実行は不可。45分完了。※今回は参考情報。\n【演習】ダミーDD PDF3件→指摘パターン→新規の差分分析。", "rag_area": "業務効率化・データ分析", "industry": "薬局DD（HC） / 食品会社DD（FD） / 管理部門DD（AD）", "mapping": "HC-3, HC-4 / AD-11"}, {"no": 5, "name": "バリュエーション検証・事業モデルレビュー", "pattern": "A. 投資・買収（DD）", "track": "中上級", "efficiency": "", "analysis": "●", "strategy": "", "issue": "・投資案件で受領する事業モデル（PL/BS/CF/DCF）の前提条件の作り込み品質にばらつきがあり、読み手のスキル差も大きい。\n・営業・仲介会社が共有するバリュエーションの妥当性検証が不十分で、提出モデルをそのまま正として扱いがち。\n・レビュー観点（売上成長率の根拠、コスト前提の妥当性、WACC算出根拠、ターミナルバリューの置き方等）が属人的で見落としが発生しやすい。\n・感度分析を手動で行っており、前提変更の影響を迅速に把握できない。", "tobe": "受領した事業モデルの前提条件が、過去レビューで蓄積された<レビュー観点リスト（15項目以上）>に基づき自動チェックされる。売上成長率・コスト前提・WACC・ターミナルバリュー等の主要パラメータについて感度分析テーブル（±5%/±10%/±20%）が自動生成され、前提変動がNPVに与える影響が即座に可視化。レビュー品質が属人的でなく、ジュニアでもシニアと同等の観点で検証できる状態。", "group": "A. 投資・買収（起案・DD・ソーシング）", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "○", "chat_sol": "【到達率35%】Claude Sonnetに過去レビュー済みモデルExcel2件（レビューコメント付き）を添付し<レビュー観点と指摘パターンを抽出して>と指示→観点リスト取得。新規モデルで<チェックして>と指示。数値間の整合性チェックはCopilotより正確だが、感度分析テーブルの自動生成は部分的。複雑な数式の読解にはOpus推奨（トークン消費注意）。\n【演習】ダミーモデルExcel2件→レビュー観点→新規モデルに適用。", "chat_area": "データ分析", "agent_sol": "【到達率55%】Step1（10分）: GitHubにレビュー済み事業モデルExcel3件（各PL/DCF2シート構成、3年、レビューコメント・修正履歴付き、軽量版）をアップロード。<①レビュー指摘と修正パターン、②前提条件の妥当性基準（売上成長率上下限、営業利益率ベンチマーク等）、③感度分析で確認すべきパラメータ組合せをCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新規モデルExcel1件を追加し<レビュー観点で前提チェックし問題点をリストアップし、主要2パラメータの感度分析テーブル（±10%/±20%のNPV変動）を作成して、1つのMarkdownファイル『モデルレビュー_[案件名]_人間向け.md』として保存してください。過去3件との比較も1ファイルに含めてください。Pythonスクリプトは作成しないでください>と指示。到達率55%：観点網羅と定性チェックは妥当、感度数値は手動補正要の場合あり。#3と同じく数値計算は重いため3年・軽量版・2パラメータに縮小。\n【演習】ダミーモデルExcel3件（3年・軽量）→レビュー基準→新規モデルの自動レビュー。", "agent_area": "データ分析", "rag_sol": "【到達率40%】過去レビュー資料・指摘記録・投資委員会質疑3件をNotebookLMにアップし<モデルレビューで頻出する前提の問題点と見抜き方は？>と質問。ナレッジ取得。計算検証は不可だが観点整理に有効。45分完了。※今回は参考情報。\n【演習】ダミーレビュー記録3件→指摘パターン→新規の観点チェック。", "rag_area": "データ分析", "industry": "小売事業モデル（RT） / 食品事業モデル（FD） / クリニック収支モデル（HC）", "mapping": "AD-6, AD-9"}, {"no": 6, "name": "案件リスク洗い出し・所見支援（横断分析）", "pattern": "A. 投資・買収（DD）", "track": "中上級", "efficiency": "", "analysis": "●", "strategy": "●", "issue": "・複数案件を横断してリスク論点の抜け漏れを減らし、所見（リスク評価レポート）の質と作成スピードを上げたい。\n・過去の案件メモ・議事録・リスク報告が担当者ごとに散在し、横断的な知見の再利用が困難。案件間で同じリスクを見落とすケースが繰り返されている。\n・投資進捗モニタリングとリスクエクスポージャーの可視化が弱く、継続/撤退判定が直感的になりやすい。\n・新規案件のリスクプロファイルと過去事例の類似性を短時間で把握する手段がない。", "tobe": "複数案件のリスク要因が横断学習され、新規案件に対しリスクパターン（頻度上位10項目・業種別特徴・買収形態別特徴）が自動検出される。過去のリスク顕在化事例と類似度が提示され、所見ドラフトが自動生成される。投資ポートフォリオ全体のリスクエクスポージャーが経営向けに可視化され、継続/撤退判断が構造的に行われる状態。", "group": "A. 投資・買収（起案・DD・ソーシング）", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "○", "chat_sol": "【到達率35%】Claude Sonnetに過去リスク報告2件を添付し<リスク論点をカテゴリ（財務/法務/人事/事業/外部環境）別に分類し、深刻度順に整理して>と指示。Copilotより分類精度が高く、カテゴリ間の関連性も指摘可能。ただし5件以上の横断分析はClaude Codeの方が安定。\n【演習】ダミー所見2件→リスク分類→新規に適用。", "chat_area": "データ分析・事業構想", "agent_sol": "【到達率65%】Step1（10分）: GitHubに過去リスク報告・所見5件（案件名/業種/リスク項目/深刻度/対応策/結果を含むPDF、各2〜3頁の軽量版）をアップロード。<この5件を横断分析し、①リスクカテゴリ（財務・法務・人事・事業等）別の発現パターン上位10項目、②業種・買収形態別の特徴、③所見テンプレート（セクション構成と記載ポイント）をCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新規案件概要1件を追加し<CLAUDE.mdのリスクパターンで新規案件のリスクを洗い出し、1つのMarkdownファイル『リスク洗出し_[案件名]_人間向け.md』として保存してください。ファイル内に①リスク一覧表（カテゴリ・深刻度・対応策）、②過去5件との類似度、③所見ドラフトを含めてください。Pythonスクリプトは作成しないでください>と指示。到達率65%：リスク分類と所見構造は高精度、定量的なエクスポージャー算定は部分的。45分完了。\n【演習】ダミーリスク報告5件→パターン定義→新規のリスク洗い出し+所見ドラフト。", "agent_area": "データ分析・事業構想", "rag_sol": "【到達率45%】過去リスク報告・所見・投資委員会議事録5件をNotebookLMにアップし<繰り返し発現するリスクパターンは？業種ごとの特徴は？>と質問。引用付きでナレッジ取得。横断検索に強いが構造的分析は限定的。45分完了。※今回は参考情報。\n【演習】ダミー報告5件→リスクパターン→新規の論点チェック。", "rag_area": "データ分析・事業構想", "industry": "新興国案件リスク / 国内投資リスク / ポートフォリオリスク", "mapping": "AD-21, AD-22"}, {"no": 7, "name": "投資・買収の起案書・申請書ドラフト自動生成", "pattern": "A. 投資・買収（起案）", "track": "初級中級", "efficiency": "●", "analysis": "", "strategy": "●", "issue": "・新規出店起案書や買収申請書は案件タイプ（新規出店/事業譲受/株式取得等）ごとに類型化できるが、案件ごとにゼロから起案しており作成に3〜5時間を要する。\n・過去の承認/差戻し事例から学ぶ仕組みがなく、審議で指摘されやすい論点（投資回収年数の根拠、競合分析の粒度、リスク対応策の具体性等）の見落としによる手戻りが年間案件の約3割で発生。\n・関連情報（物件情報・競合データ・財務試算等）が複数資料に分散し、論点の洗い出しと初期コメント作成に時間がかかる。", "tobe": "過去の承認/差戻し事例（各10件以上）から抽出された<審議で指摘されやすい論点Top10>と<高評価起案書の共通構成パターン>がフレームワーク化され、新規案件パラメータ入力で起案書ドラフト（4〜5頁）が自動生成。作成時間3〜5時間→1時間以内に短縮。差戻し率3割→1割以下に改善されている状態。", "group": "A. 投資・買収（起案・DD・ソーシング）", "chat_fit": "◎", "agent_fit": "○", "rag_fit": "◎", "chat_sol": "【到達率50%】Claude Sonnetに過去起案書3件（承認2件/差戻し1件、各4〜6頁PDF）を添付し<承認された起案書の論点構成と、差戻し起案書で指摘された不備を分析して、①起案書の標準構成（セクション・論点の順序）、②品質チェックリスト（審議で指摘されやすい10項目）を作成して>と指示→論点パターンとチェックリスト取得。新規物件情報を渡し<このパターンに沿って起案書ドラフトをMarkdown形式で作成して。チェックリストの充足状況も末尾に付けて>と指示。Markdown出力でWord変換は別途必要だが、論点の網羅性は高い。45分完了。\n【演習】ダミー起案書3件（承認/差戻し混在）→論点パターン+チェックリスト抽出→新規物件で起案書ドラフト生成。", "chat_area": "業務効率化・事業構想", "agent_sol": "【参考：到達率60%】※初級中級タスクのためClaude Codeは演習対象外。参考情報として：Sonnetで過去起案書3件から共通論点構造・審議指摘パターンをCLAUDE.mdに定義（Step1:15分）。新規案件情報でフレームワーク適用（Step2:20分）。構造化に強いがWord出力は別途変換要。45分完了。", "agent_area": "業務効率化・事業構想", "rag_sol": "【到達率50%】過去起案書3件（承認2件/差戻し1件）＋審議議事録をNotebookLMにアップし<承認と差戻しの違いは何ですか？審議で繰り返し指摘される論点を整理してください>と質問。引用付きで成功/失敗パターンが明確に対比される。起案書の直接生成は不可だが論点網羅性の担保に有効。45分完了。※今回は参考情報。\n【演習】ダミー起案書3件+議事録→パターン→新規の論点チェック。", "rag_area": "業務効率化・事業構想", "industry": "出店起案書 / 買収申請書 / リスク所見書", "mapping": "HC-5, HC-6 / AD-5"}, {"no": 8, "name": "投資案件の壁打ち・思考支援AI", "pattern": "A. 投資・買収（起案）", "track": "初級中級", "efficiency": "", "analysis": "", "strategy": "●", "issue": "・投資案件の検討で、いつでも壁打ちできる相手が欲しいが、上司・同僚への依頼は時間・手間の制約がある。\n・社内の意思決定の癖（重視する指標、過去の反省点、暗黙のNG条件）を踏まえた指摘が欲しいが、それが体系化されていない。\n・過去の検討経緯・判断根拠が個人メモや議事録に散在しており、新任者が同水準で検討するのが難しい。\n・情報収集・分析を行えば壁打ちの品質を高められるが、情報源が分散し探すだけで時間がかかる。", "tobe": "社内の意思決定基準（重視指標・過去の反省・NG条件）がナレッジ化され、新規案件の検討時にAIが壁打ち相手として機能する。過去5年分の判断根拠が即座に参照でき、<あの時なぜ見送ったか>が秒単位で引き出せる。新任者も経験者と同水準の検討品質を実現できる状態。", "group": "A. 投資・買収（起案・DD・ソーシング）", "chat_fit": "○", "agent_fit": "○", "rag_fit": "◎", "chat_sol": "【到達率40%】Claude Sonnetに過去検討メモ2件を添付し<この案件の論点を洗い出して。特にリスク・機会・自社適合性の観点で、見落としがちなポイントも指摘して>と壁打ち。Copilotより文脈理解が深く、添付資料の内容を踏まえた壁打ちの質が高い。ただし社内固有の判断基準（暗黙のNG条件等）は学習させないと反映されない。Opusに切替えると更に深い洞察が得られるがトークン消費大。45分完了。\n【演習】ダミー検討メモ2件→論点洗い出し→新規案件で壁打ち体験。", "chat_area": "事業構想", "agent_sol": "【参考：到達率55%】※初級中級タスクのためClaude Codeは演習対象外。参考情報として：Sonnetで過去検討メモ・投資委員会議事録から社内判断基準をCLAUDE.mdに定義（Step1:15分）。新規案件で基準に基づく壁打ち（Step2:20分）。社内固有の観点を反映した壁打ちが可能。45分完了。", "agent_area": "事業構想", "rag_sol": "【到達率50%】過去検討メモ・議事録・投資後振り返り3件をNotebookLMにアップし<過去の投資判断で、後から見て正しかった判断と反省すべき判断のパターンは？>と質問。引用付きでナレッジ取得。ノートブック共有で全メンバーが壁打ち利用可能。RAGの典型的活用例。45分完了。※今回は参考情報。\n【演習】ダミー議事録+振り返り3件→判断ナレッジ→新規案件の壁打ち。", "rag_area": "事業構想", "industry": "全部門共通（社内慣行ナレッジベース）", "mapping": "FD-14, FD-18 / AD-7"}, {"no": 9, "name": "新商品・新規テーマの導入判断スコアリング", "pattern": "B. 事業計画・戦略分析", "track": "中上級", "efficiency": "", "analysis": "●", "strategy": "●", "issue": "・新商品/新規テーマの導入判断で、需要の兆しと自社適合性を短時間で見極めるのが難しい。過去3年の導入商品のうち約4割が計画未達。\n・過去の導入結果データ（成功/失敗、売上実績、カテゴリ、ターゲット層）はExcelに蓄積されているが、成否要因の分析が追いつかない。\n・販売データや顧客フィードバックから<誰に何を提案すべきか>の整理が属人的。\n・流行商品のキャッチアップ遅れと過剰導入の在庫リスクのバランスが難しい。", "tobe": "過去の導入実績データ（100件以上、成功/失敗の判定と売上実績付き）から抽出された成功パターン（カテゴリ×ターゲット層×価格帯×導入時期の組合せ）に基づき、新候補がスコアリングされる。<過去に導入成功した商品の共通特徴>との適合度が即座にスコア算出され、計画未達率が4割→2割以下に改善。データに基づく判断で流行遅れと過剰導入リスクが抑制される状態。", "group": "B. 事業計画・戦略分析", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "○", "chat_sol": "【到達率40%】Claude Sonnetに過去導入結果CSV（30件、成功/失敗判定付き）を添付し<成功/失敗の共通要因を抽出して、スコアリング基準をMarkdown表で整理して>と指示。新候補5件で<この基準で評価して>と指示。Copilotより構造化分析が強く、成否パターンの言語化品質が高い。ただし定量的なスコアリングモデルの厳密な構築はClaude Codeに劣る。\n【演習】ダミー導入結果CSV→評価基準→新商品5件を判定。", "chat_area": "データ分析・事業構想", "agent_sol": "【到達率65%】Step1（10分）: GitHubに過去導入結果CSV（5件、列：商品名/カテゴリ/ターゲット層/価格帯/導入時期/初月売上/3ヶ月累計/成否判定/判定理由）をアップロード。<成功/失敗パターンを分析し、スコアリングモデル（評価軸・重み・閾値）をCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新商品候補CSV（5件、判定なし）を追加し<CLAUDE.mdのスコアリングモデルで各候補を評価し、1つのMarkdownファイル『新商品スコアリング_[案件名]_人間向け.md』として保存してください。ファイル内に①ランキング表（推奨/保留/見送りの3段階判定＋根拠）、②過去5件との比較を含めてください。Pythonスクリプトは作成しないでください>と指示。5件規模は研修用の軽量版であり、デスクトップ版なら50件でも処理可能と説明。到達率65%：カテゴリ・価格帯の適合度は高精度、市場タイミングの判断は部分的。45分完了。\n【演習】ダミー実績CSV5件→パターン定義→新商品5件をスコアリング。", "agent_area": "データ分析・事業構想", "rag_sol": "【到達率45%】過去導入レポート・顧客フィードバック3件をNotebookLMにアップし<成功商品の共通特徴は？失敗商品と何が違う？>と質問。引用付きで成功パターン取得。定量スコアリング不可だが定性適合度評価に有効。45分完了。※今回は参考情報。\n【演習】ダミーレポート3件→成功パターン→新商品の適合度評価。", "rag_area": "データ分析・事業構想", "industry": "リテイル顧客インサイト（RT） / 食品クロスセル（FD） / 薬局商品導入（HC）", "mapping": "HC-7 / FD-8, FD-20 / RT-14"}, {"no": 10, "name": "事業計画ドラフト作成（フレームワーク適用型）", "pattern": "B. 事業計画・戦略分析", "track": "中上級", "efficiency": "", "analysis": "●", "strategy": "●", "issue": "・事業計画は既存実績データ、周辺需要、競合状況、来店導線など複数データを突合して作る必要があるが、入力・整形が手作業で負荷が高い。\n・仮説（客層/カテゴリ構成/棚割等）の置き方が属人的で根拠説明が弱くなりやすい。\n・短期間で複数候補地を比較する際、フォーマット統一と整合性チェックが追いつかない。\n・前提整理と情報収集に時間がかかり、シナリオ間の比較軸が揃いにくい。", "tobe": "過去の事業計画書（計画超過/計画通り/計画未達の実績付き、各5件以上）から抽出された計画策定フレームワーク（前提条件の置き方・KPI構成・シナリオ設計パターン）に基づき、新規候補地のパラメータ入力だけで事業計画が自動生成される。複数候補の一括比較も瞬時完了。計画と実績の乖離分析がフィードバックされ、予測精度が継続的に向上する仕組みが回っている状態。", "group": "B. 事業計画・戦略分析", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "○", "chat_sol": "【到達率40%】Claude Sonnetに過去計画書Excel2件を添付し<前提条件・仮説パターンを抽出し、計画策定フレームワークを整理して>と指示。新規候補地で<フレームワークで計画を作成して>と指示。Copilotより前提条件の構造化が得意で、フレームワークの言語化品質が高い。複数候補の比較もMarkdown表で対応可能（3候補まで）。\n【演習】ダミー計画書2件→フレームワーク→新規1候補に適用。", "chat_area": "データ分析・事業構想", "agent_sol": "【到達率65%】Step1（10分）: GitHubに過去事業計画Excel3件（計画超過1件/計画通り1件/計画未達1件、各件に3年分の計画値・実績値・乖離分析付き、軽量版）をアップロード。<①3件の前提条件パターン（売上前提・コスト構造・KPI構成）、②計画精度が高い案件の特徴、③シナリオ設計の型（楽観/中立/保守の設定方法）をCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新規候補地の基本情報（立地・面積・競合・想定客数）を追加し<CLAUDE.mdのフレームワークで3シナリオ（楽観/中立/保守）の事業計画を作成し、1つのMarkdownファイル『事業計画ドラフト_[案件名]_人間向け.md』として保存してください。3シナリオ比較表と過去3件との比較を含めてください。Pythonスクリプトは作成しないでください>と指示。到達率65%：フレームワーク適用と構造は高精度、数値の妥当性は手動確認要。45分完了。\n【演習】ダミー計画Excel3件（3年・軽量）→パターン定義→新規候補で3シナリオ生成。", "agent_area": "データ分析・事業構想", "rag_sol": "【到達率45%】過去計画書・実績検証レポート3件をNotebookLMにアップし<計画と実績の乖離原因は？精度が高い計画の特徴は？>と質問。成功/失敗パターン取得。計画書生成不可だが妥当性チェックに有効。45分完了。※今回は参考情報。\n【演習】ダミー計画書+実績3件→精度パターン→新規の前提チェック。", "rag_area": "データ分析・事業構想", "industry": "小売出店計画（RT） / 食品事業計画（FD） / 薬局出店計画（HC）", "mapping": "HC-8 / RT-2, RT-31"}, {"no": 11, "name": "内部・外部環境分析の体系化（視察・現場データ含む）", "pattern": "B. 事業計画・戦略分析", "track": "中上級", "efficiency": "", "analysis": "●", "strategy": "●", "issue": "・事業会社から受領する簡易PL/BSや競合公表資料をもとに比較表を手作業で作成しており、1件あたりの分析に半日を要する。\n・分析観点の網羅（財務/生産/物流/研究/ガバナンス等）に担当者間でばらつきが出やすい。\n・現場で得た外部情報（視察データ・価格・棚割・立地特性等）が担当者の手元に散在し、蓄積・分析の仕組みが弱い。\n・同一対象を複数回分析しているのに過去結果を活用できず、毎回ゼロベースの非効率がある。", "tobe": "内部環境（簡易PL/BS/KPI）と外部環境（競合・市場・規制・視察データ）が構造化フレームワーク（5Forces/SWOT/PEST等のテンプレート）に基づき統合分析され、比較表・示唆が自動生成される。現場データも蓄積・構造化され、時系列比較が可能。分析時間が半日→2時間に短縮された状態。", "group": "B. 事業計画・戦略分析", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "○", "chat_sol": "【到達率40%】Claude Sonnetに過去分析資料2件（内部PL/BS＋外部競合データ）を添付し<比較軸・分析フレームワーク（SWOT/5Forces等）を抽出し、統合テンプレートを作成して>と指示。新規データで<分析して>と指示。Copilotより多ソース統合の精度が高く、フレームワーク適用の質が向上。ただし視察データ等の大量文書はトークン制限に注意。\n【演習】ダミー分析資料2件→フレームワーク→新規に適用。", "chat_area": "データ分析・事業構想", "agent_sol": "【到達率65%】Step1（10分）: GitHubに過去分析資料3件（内部PL/BS＋外部競合データ＋視察記録、各5〜10頁）をアップロード。<3件を分析し、①分析フレームワーク（比較軸・評価項目・定量/定性の区分）、②内部/外部データの統合テンプレート、③視察データの構造化フォーマット（地域/価格/棚割/所見等）をCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新規対象の内部PL＋外部データ＋視察メモを追加し<フレームワークで統合分析し、1つのMarkdownファイル『環境分析レポート_[案件名]_人間向け.md』として保存してください。比較表＋示唆＋過去3件との比較を1ファイルに含めてください。Pythonスクリプトは作成しないでください>と指示。到達率65%：構造化と比較表は高精度、示唆の深さは手動補強要。45分完了。\n【演習】ダミー分析資料3件→フレームワーク定義→新規の統合分析。", "agent_area": "データ分析・事業構想", "rag_sol": "【到達率45%】過去分析資料・競合レポート3件をNotebookLMにアップし<各社の強み弱みパターンは？見落としがちな観点は？>と質問。引用付きで定性比較取得。構造化比較表は自動生成不可だが論点網羅に有効。45分完了。※今回は参考情報。\n【演習】ダミー資料3件→比較パターン→新規の論点チェック。", "rag_area": "データ分析・事業構想", "industry": "小売競合+店舗視察（RT） / 食品業界分析（FD） / 医療業界分析（HC）", "mapping": "FD-16,17,12 / RT-16,28,7,17"}, {"no": 12, "name": "現地規制・許認可情報の収集と更新", "pattern": "B. 事業計画・戦略分析", "track": "初級中級", "efficiency": "●", "analysis": "", "strategy": "●", "issue": "・国/地域ごとの規制・許認可要件の更新が頻繁で（主要5ヶ国で年間計10〜15件の改正）、情報源が政府公報・法律事務所レター・業界団体レポート等に分散。\n・案件検討時に必要な条文やガイドラインを探すのに1件あたり1〜2時間を要する。\n・社内規程の照会が都度発生し、過去の問合せ（年間100件以上）が体系化されていない。同じ質問が繰り返される。\n・解釈の履歴（なぜその判断をしたか）が残りにくく、担当者交代時に品質が低下しやすい。", "tobe": "各国の規制・許認可情報と社内規程が構造化されて蓄積され、案件検討時に<この国のこの業種の規制は？>で即座に引き出せる。過去の照会対応がナレッジベース化され、同種の質問は自動回答。解釈の履歴も残り、担当者が変わっても同品質で対応。検索時間1〜2時間→10分以内に短縮された状態。", "group": "B. 事業計画・戦略分析", "chat_fit": "○", "agent_fit": "○", "rag_fit": "◎", "chat_sol": "【到達率40%】Claude Sonnetにガイドライン文書PDF2件を添付し<主要規制の構造（対象行為・要件・届出先・罰則）を整理して、照会に即答できるナレッジ表を作成して>と指示。Copilotより構造化精度が高く、規制文書の読解品質が向上。Claude自身の法規制知識で補完も可能（ただし最新改正は反映されない場合あり）。45分完了。\n【演習】ダミー規制文書2件→構造整理→照会シミュレーション。", "chat_area": "業務効率化・事業構想", "agent_sol": "【参考：到達率50%】※初級中級タスクのためClaude Codeは演習対象外。参考情報として：Sonnetで規制文書・照会ログから規制体系・判断基準をCLAUDE.mdに定義。新規照会への自動回答。45分完了。", "agent_area": "業務効率化・事業構想", "rag_sol": "【到達率55%】規制文書・ガイドライン・過去照会対応ログ3件をNotebookLMにアップし<この案件に関連する規制は？過去に類似の照会はあった？>と質問。引用付きで即座に回答。ノートブック共有でチーム全員がナレッジにアクセス。過去の解釈履歴も引用付きで再現。RAGの典型的活用例。45分完了。※今回は参考情報。\n【演習】ダミー規制文書3件→ナレッジ化→新規照会の即時回答。", "rag_area": "業務効率化・事業構想", "industry": "小売出店許認可（RT） / 管理部門規程（AD）", "mapping": "RT-13 / AD-2"}, {"no": 13, "name": "新規ビジネスの発想・構想支援", "pattern": "B. 事業計画・戦略分析", "track": "初級中級", "efficiency": "", "analysis": "", "strategy": "●", "issue": "・ブレストを重ねても論点が固定化し、同じメンバーでは発想が広がらない。年間のアイデア検討サイクルは4〜6回だが、実行に至るのは1〜2件。\n・アイデア出し自体に時間がかかり（1回のブレストに半日）、検討サイクルが遅くなる。\n・面談メモ作成から次アクション設定までが都度手作業で、面談記録が散在し追跡が難しい。\n・過去に検討して見送ったアイデアの理由が記録されず、同じアイデアが再浮上しがち。", "tobe": "過去の検討履歴（実行/見送りの判断理由付き）に基づく論点拡張とシナリオ生成がAIにより加速される。<過去に見送った理由>が即座に参照でき、同じ検討の重複が排除。ブレストの固定化が打破され、実行率を維持しつつ検討サイクルが半日→2時間に短縮されている状態。", "group": "B. 事業計画・戦略分析", "chat_fit": "○", "agent_fit": "○", "rag_fit": "○", "chat_sol": "【到達率40%】Claude Sonnetに過去検討メモ2件を添付し<新規テーマの論点を拡張して。特に①既存事業とのシナジー、②見落としがちなリスク、③海外の類似事例の観点で>と壁打ち。Copilotより文脈理解と発想の幅が広く、壁打ち相手としての品質が高い。Opusに切替えると更に深い構造的思考が可能（トークン消費注意）。45分完了。\n【演習】ダミー検討メモ2件→論点拡張→新規テーマのブレスト。", "chat_area": "事業構想", "agent_sol": "【参考：到達率50%】※初級中級タスクのためClaude Codeは演習対象外。参考情報として：Sonnetで過去検討メモ・面談録から検討フレームワーク・発想パターンをCLAUDE.mdに定義。新規テーマでアイデア生成。45分完了。", "agent_area": "事業構想", "rag_sol": "【到達率45%】過去検討メモ・面談録・市場レポート5件をNotebookLMにアップし<過去に見送ったアイデアの理由は？見落とされている機会は？>と質問。引用付きで新たな視点を提供。ノートブック共有で共同ブレスト可能。45分完了。※今回は参考情報。\n【演習】ダミー資料5件→機会発見→新規テーマのブレスト。", "rag_area": "事業構想", "industry": "小売新規テーマ（RT） / 食品新規事業（FD）", "mapping": "FD-2 / RT-19"}, {"no": 14, "name": "業績ダッシュボード・予実差異分析", "pattern": "C. 定型業績管理", "track": "中上級", "efficiency": "●", "analysis": "●", "strategy": "", "issue": "・約180施設規模の売上・人件費の予実比較を月次で実施しているが、施設数増加に伴い予実ギャップの確認・要因整理に時間が増加。\n・月次実績とKPIの可視化は進んでいるが、示唆抽出（なぜ乖離したか、次にどうするか）が弱く意思決定に繋がりにくい。\n・施策効果の測定で集計軸が案件ごとに異なり、比較が困難で意思決定が遅れがち。\n・表計算での更新作業が多く、更新漏れや手戻りが発生しやすい。", "tobe": "180施設規模の売上・人件費予実データが自動取込みされ、予実ギャップの検出・要因分類（価格/数量/ミックス/コスト等）・異常値アラート（閾値±5%超）がダッシュボードで可視化。過去の要因パターンに基づく自動コメント付与（<前年同月比X%減の主因はY>等）により差異分析の工数が大幅削減。施設数増加にもスケーラブルに対応できる体制。", "group": "C. 定型業績管理・レポーティング", "chat_fit": "△", "agent_fit": "◎", "rag_fit": "△", "chat_sol": "【到達率25%】Claude Sonnetに過去予実Excel2件（20施設分）を添付し<要因分類パターン（価格/数量/ミックス/コスト）と異常値基準を抽出して>と指示。Copilotより分析フレームワークの整理精度が高いが、180施設規模の分析はトークン制限で不可。分析フレームワーク設計用。\n【演習】ダミー予実Excel2件（20施設分）→パターン→新月に適用。", "chat_area": "業務効率化・データ分析", "agent_sol": "【到達率65%】Step1（10分）: GitHubに過去予実データCSV2ヶ月分（列：施設名/売上予算/売上実績/人件費予算/人件費実績/来客数/単価、各月5施設分）＋差異分析コメント付きレポートをアップロード。<2ヶ月分を分析し、①要因分類パターン（価格/数量/ミックス/コスト/その他）、②異常値検出の閾値（±5%・±10%等）、③コメントテンプレート（乖離要因の説明パターン）をCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新月データCSV（5施設分）を追加し<CLAUDE.mdのパターンで差異分析し、1つのMarkdownファイル『予実差異分析_[対象月]_人間向け.md』として保存してください。異常値フラグ付きの施設一覧＋要因分類＋コメント＋前2ヶ月との比較を含めてください。Pythonスクリプトは作成しないでください>と指示。到達率65%：要因分類と異常値検出は概ね妥当、コメントの深さは手動補強要。2ヶ月データでも月次トレンドは読み取り可能。45分完了。\n【演習】ダミー予実CSV2ヶ月分→パターン定義→新月の差異分析。", "agent_area": "業務効率化・データ分析", "rag_sol": "【到達率30%】過去差異分析・改善施策記録3件をNotebookLMにアップし<乖離施設の改善策と効果は？>と質問。改善ナレッジ取得。分析計算不可。施策提案の参考として活用。45分完了。※今回は参考情報。\n【演習】ダミーレポート3件→改善パターン→施策提案。", "rag_area": "業務効率化・データ分析", "industry": "小売店舗予実（RT） / 食品部門KPI（FD） / 薬局人件費予実（HC）", "mapping": "HC-16 / FD-15 / AD-10 / RT-3,5,12,20"}, {"no": 15, "name": "月次業績レポート自動生成（数値収集→コメント→スライド）", "pattern": "C. 定型業績管理", "track": "中上級", "efficiency": "●", "analysis": "●", "strategy": "", "issue": "・月次報告に必要な情報が会計ERP・売上データ・予算資料など複数ソースに分散しており、数値収集・整合確認に約2.4時間を要している。\n・数値が揃ってもコメント作成は担当者の経験に依存し、分析品質にばらつきが出る。コメントの修正指示が毎月発生。\n・グラフ更新とコメント作成が同時並行で発生し、締切前に作業が集中する。\n・深掘り分析や論点整理に十分な時間が確保できない。施設買収による拠点追加で前年同月比較の条件設定も複雑化。", "tobe": "複数ソースからの数値収集・整合チェック・KPI算出・コメント生成・レビュースライド作成が一括自動化され、約2.4時間の手作業が数分に短縮。分析コメントも過去の優良パターン（上長フィードバックで修正されなかった記述）に基づいて自動ドラフトされ、修正指示の頻度が大幅低減。施設追加にも動的対応。定型作業から解放され、深掘り分析に時間を使える体制。", "group": "C. 定型業績管理・レポーティング", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "○", "chat_sol": "【到達率40%】Claude Sonnetに過去報告書3ヶ月分を添付し<数値配置・KPI算出式・コメントパターンを抽出して>と指示。新月CSVで<報告書を作成して>と指示。Copilotよりコメント生成の品質が高く、過去パターン準拠の分析コメントが自然。複数ソース統合も改善。ただしExcel形式での直接出力は不可（Markdown→Excel変換が別途必要）。\n【演習】ダミー報告書3件→テンプレートロジック→新月で適用。", "chat_area": "業務効率化・データ分析", "agent_sol": "【到達率65%】Step1（10分）: GitHubに過去月次報告書Excel2ヶ月分（各月に数値シート+コメントシート+KPIサマリー、軽量版）をアップロード。<2ヶ月分を分析し、①レイアウト・数値配置パターン、②KPI算出式（売上/利益/人件費率/来客数等）、③コメント記述パターン（前年比説明/要因分析/アクション提案の型）をCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新月の数値データCSV＋前月レポートを追加し<CLAUDE.mdのパターンで月次報告書を作成し、1つのMarkdownファイル『月次レポート_[対象月]_人間向け.md』として保存してください。数値表・KPI・コメント・前月比較を1ファイルに含めてください。Pythonスクリプトは作成しないでください>と指示。到達率65%：レイアウト・KPI・コメント構造は高精度、施設追加時の動的比較条件は手動調整要。2ヶ月でも比較は成立。45分完了。\n【演習】ダミー報告書2ヶ月分→パターン定義→新月で自動生成。", "agent_area": "業務効率化・データ分析", "rag_sol": "【到達率40%】過去報告書・上長フィードバック・修正履歴3件をNotebookLMにアップし<高評価コメントのパターンと、修正された問題点は？>と質問。品質パターン取得。レポート生成不可だがコメント品質チェックに有効。45分完了。※今回は参考情報。\n【演習】ダミー報告書+フィードバック3件→コメントパターン→新月品質チェック。", "rag_area": "業務効率化・データ分析", "industry": "小売月次業績（RT） / 食品月次ポジション（FD） / 薬局月次業績（HC）", "mapping": "HC-10〜13 / FD-21 / RT-1,18,25,27"}, {"no": 16, "name": "業績管理（基準差調整・連結取込）", "pattern": "C. 定型業績管理", "track": "中上級", "efficiency": "●", "analysis": "", "strategy": "", "issue": "・各社から国内基準ベースの表計算ファイルで業績を受領し、外部専門家に国際基準への調整を依頼している。調整費用は年間数百万円規模。\n・受領後に主管側で取込用フォーマットへ整形・再分類が必要で、手作業工程が多い。1回の調整に延べ8〜12時間。\n・ルール変更（新基準適用・例外処理追加等）があると確認コストが急増し、締切前に負荷が集中する。\n・担当者が交代すると調整ルールの引き継ぎに時間がかかり、品質低下リスクがある。", "tobe": "各社から受領した国内基準の業績データが、定義済みの調整ルール（勘定科目マッピング30〜50項目、例外処理パターン10件以上）に基づいて国際基準に自動変換され、取込用フォーマットに整形される。ルール変更や例外処理も履歴管理され、担当者が交代しても同品質で調整可能。1回あたり8〜12時間→2時間以内に短縮された状態。", "group": "C. 定型業績管理・レポーティング", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "△", "chat_sol": "【到達率35%】Claude Sonnetに調整済みExcel2件（調整前/後ペア）を添付し<勘定科目別の調整ルールと例外処理パターンを抽出して、マッピング表を作成して>と指示。新規データで<このルールで調整して>と指示。Copilotより構造化マッピングの精度が高い。ただし50科目超のルール適用はClaude Codeの方が安定。\n【演習】ダミー調整済Excel2件→ルール抽出→新規に適用。", "chat_area": "業務効率化", "agent_sol": "【到達率65%】Step1（10分）: GitHubに調整前/後ペアExcel3件（各20〜30科目、例外処理にコメント付き、軽量版）をアップロード。<調整前後を比較し、①勘定科目別の調整ルール（国内基準→国際基準のマッピング表）、②例外処理パターン（条件と処理内容）、③整合チェック項目をCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新期の調整前データExcel1件を追加し<CLAUDE.mdの調整ルールでこのデータを国際基準に変換し、1つのMarkdownファイル『基準差調整結果_[対象期]_人間向け.md』として保存してください。変換後の数値表・例外フラグ付き項目一覧・過去3件との比較を含めてください。Pythonスクリプトは作成しないでください>と指示。到達率65%：定型科目の変換は妥当、新規例外の判定は手動確認要。CLAUDE.md修正でルール更新も容易。45分完了。\n【演習】ダミー調整前後Excel3件→ルール定義→新規に自動適用。", "agent_area": "業務効率化", "rag_sol": "【到達率35%】調整マニュアル・例外事例・監査指摘3件をNotebookLMにアップし<頻出する調整項目と判断基準は？>と質問。ナレッジ取得。実際の変換処理は不可。新人オンボーディングの参照用。45分完了。※今回は参考情報。\n【演習】ダミーマニュアル+例外事例→ナレッジ→新規の判断支援。", "rag_area": "業務効率化", "industry": "薬局会計基準調整（HC固有）", "mapping": "HC-9"}, {"no": 17, "name": "グループ会社モニタリング・税務統制", "pattern": "C. 定型業績管理", "track": "初級中級", "efficiency": "●", "analysis": "", "strategy": "●", "issue": "・グループ傘下の事業会社（10社以上）について月次の定量データ・定性コメントを受領しているが、深い考察や気づきの抽出が十分に行われない。\n・国際的な税務リスクの高まりに伴い、各国ルールの変化や解釈の難易度が増している。税制改正の頻度は年2〜3回/主要国。\n・分析観点や深掘りの仕方が担当者に依存し、継続的な改善につながりにくい。\n・過去の問合せ対応（税務照会への回答等）が体系化されておらず、同種の照会に毎回ゼロから対応。", "tobe": "月次モニタリングで受領する定量/定性データから、過去の深掘り観点（上長が評価した分析・改善が生まれた分析のパターン）に基づく自動分析が行われる。税制変化のモニタリングが仕組み化され、照会対応のナレッジが蓄積。対応品質が属人的でなくなっている状態。", "group": "C. 定型業績管理・レポーティング", "chat_fit": "○", "agent_fit": "○", "rag_fit": "◎", "chat_sol": "【到達率40%】Claude Sonnetに月次レポート2件を添付し<このレポートから深掘りすべき気づきポイントを抽出して。特に数値の背景にある構造的課題と、見落とされがちな論点を指摘して>と指示。Copilotより文脈理解が深く、定性コメントの深掘り品質が向上。税務規制等の外部情報はClaude自身の知識ベースで補完可能（ただしリアルタイム情報はなし）。45分完了。\n【演習】ダミー月次レポート2件→気づき抽出→深掘りコメント作成。", "chat_area": "業務効率化・事業構想", "agent_sol": "【参考：到達率55%】※初級中級タスクのためClaude Codeは演習対象外。参考情報として：Sonnetで過去月次レポート+上長フィードバック3件から深掘り観点パターンをCLAUDE.mdに定義。新月データで自動分析。45分完了。", "agent_area": "業務効率化・事業構想", "rag_sol": "【到達率50%】過去月次レポート・税務ガイドライン・監査指摘・照会対応ログ3件をNotebookLMにアップし<見落とされがちな論点は？過去の照会で繰り返し聞かれた質問は？>と質問。引用付きでモニタリングナレッジ取得。ノートブック共有でチーム全員がナレッジにアクセス可能。RAGの典型的活用例。45分完了。※今回は参考情報。\n【演習】ダミーレポート+ガイドライン3件→論点ナレッジ→新月の深掘り。", "rag_area": "業務効率化・事業構想", "industry": "管理部門固有（グループガバナンス）", "mapping": "AD-8, AD-12, AD-31"}, {"no": 18, "name": "在庫最適化（需要予測・適正在庫算出）", "pattern": "D. オペレーション最適化", "track": "中上級", "efficiency": "●", "analysis": "●", "strategy": "", "issue": "・期限切れによる廃棄が月間在庫の約3〜5%発生しており、適正在庫を保つための需要予測と補充判断が難しい。\n・季節性（花粉症/インフルエンザ/処方傾向の変化）や近隣施設の動向など複数要因が絡み、担当者の経験に依存しやすい。\n・店舗間（10〜20店舗）の余剰・不足を横断で把握できず、融通の判断が遅れがち。\n・廃棄コストの削減と欠品リスクの回避はトレードオフ関係にあり、定量的な判断基準がない。", "tobe": "品目カテゴリ別（医薬品:処方薬/OTC、食品:冷凍/常温等）の需要予測モデルが構築され、季節性・処方傾向を織り込んだ適正在庫が自動算出。店舗間の余剰・不足が横断可視化され、融通判断が迅速化。廃棄率3〜5%→1〜2%に削減されている状態。", "group": "D. データ駆動型オペレーション最適化", "chat_fit": "△", "agent_fit": "◎", "rag_fit": "△", "chat_sol": "【到達率25%】Claude Sonnetに過去12ヶ月の在庫CSV（品目×月の販売実績・在庫量・廃棄量）を添付し<需要パターン・季節変動・廃棄パターンを抽出して>と指示。Copilotより数値分析精度が高く、季節パターンの言語化が的確。ただし予測モデル構築は不可。パターン可視化ツールとして活用。\n【演習】ダミー販売実績CSV（12ヶ月×30品目）→需要パターン把握→来月傾向推定。", "chat_area": "データ分析", "agent_sol": "【到達率55%】Step1（10分）: GitHubに販売・在庫CSV2ヶ月分（列：月/品目名/カテゴリ/販売数/在庫数/廃棄数/店舗名、10品目×2ヶ月、軽量版）をアップロード。<2ヶ月データを分析し、①品目カテゴリ別の販売傾向、②廃棄多発品目の特徴、③適正在庫の算出ロジック（安全在庫係数・発注点の考え方）をCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新月の販売データCSV（10品目）を追加し<CLAUDE.mdのパターンで翌月の需要予測と適正在庫を品目別に算出し、1つのMarkdownファイル『在庫最適化_[対象月]_人間向け.md』として保存してください。過剰/不足リスクのある品目をフラグ付きで一覧化し、過去2ヶ月との比較も含めてください。Pythonスクリプトは作成しないでください>と指示。到達率55%：基本の販売傾向抽出と適正在庫算出は可能、ただし2ヶ月データでは季節性パターン抽出は限定的で、実務では年単位データが必要（デスクトップ版推奨）。研修では「流れの体験」に限定。45分完了。\n【演習】ダミー2ヶ月CSV→パターン定義→翌月の需要予測+適正在庫算出。", "agent_area": "データ分析", "rag_sol": "【到達率30%】在庫管理レポート・廃棄分析3件をNotebookLMにアップし<廃棄多発の時期・品目パターンは？ベテランの経験則は？>と質問。属人的ノウハウの形式知化に有効。予測計算不可。45分完了。※今回は参考情報。\n【演習】ダミーレポート3件→廃棄パターン→重点品目特定。", "rag_area": "データ分析", "industry": "食品在庫（冷凍原料）（FD） / 薬局在庫（医薬品）（HC）", "mapping": "HC-14 / FD-24"}, {"no": 19, "name": "シフト作成・人員配置最適化", "pattern": "D. オペレーション最適化", "track": "中上級", "efficiency": "●", "analysis": "●", "strategy": "", "issue": "・需要変動（処方件数/来店客数等）に応じた必要人員の見立てと個人希望の両立に時間がかかる。1店舗のシフト作成に3〜4時間。\n・突発欠員や繁忙日の偏りがあると再調整が頻発し、調整担当の負荷が高い。月間の調整回数は平均5〜8回。\n・店舗間で応援配置を回す仕組みが弱く、局所的な人手不足が解消しにくい。\n・法定休日・有給・資格要件（薬剤師配置義務等）の制約が複雑で、手動では全制約の同時満足が困難。", "tobe": "過去の確定シフトから抽出された配置パターン（曜日別・時間帯別・スキル配置）を初期解として、制約条件（法定休日・個人希望・需要変動・資格要件）を満たすシフト表が自動生成される。突発欠員時もパラメータ変更で再最適化が瞬時完了。シフト作成時間3〜4時間→30分以内、月間再調整回数5〜8回→2回以下に削減された状態。", "group": "D. データ駆動型オペレーション最適化", "chat_fit": "△", "agent_fit": "◎", "rag_fit": "△", "chat_sol": "【到達率20%】Claude Sonnetに過去シフトExcel2ヶ月分を添付し<曜日別・時間帯別の配置パターンと増員ルールを抽出して>と指示。Copilotより制約条件の構造化は得意だが最適化計算は不可。簡易シフト案の叩き台まで。\n【演習】ダミーシフト2ヶ月（10名×30日）→配置パターン→新月の簡易案。", "chat_area": "業務効率化・データ分析", "agent_sol": "【到達率55%】Step1（10分）: GitHubに過去確定シフトExcel2ヶ月分（列：日付/時間帯/スタッフ名/役職/資格/希望/確定配置、5名×30日×2ヶ月、軽量版）をアップロード。<2ヶ月のシフトを分析し、①曜日×時間帯別の配置パターン、②スタッフ別の勤務制約（週X日以内/連続勤務Y日以内/資格要件）、③増員判断基準（来客数閾値）をCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新月の希望シフト＋来客数予測CSV（5名分）を追加し<CLAUDE.mdのパターンと制約でシフト表を作成し、1つのMarkdownファイル『シフト表_[対象月]_人間向け.md』として保存してください。制約違反フラグ付きの配置表、過去2ヶ月との比較を含めてください。Pythonスクリプトは作成しないでください>と指示。到達率55%：基本配置はパターン適用可能、複雑な制約の同時最適化は手動補正要。2ヶ月×5名は研修用の軽量版であり、実務規模はローカル環境で数理最適化（PuLP等）を推奨。45分完了。\n【演習】ダミーシフト2ヶ月×5名→パターン定義→新月で自動生成。", "agent_area": "業務効率化・データ分析", "rag_sol": "【到達率25%】過去シフト・トラブル事例3件をNotebookLMにアップし<人員不足の共通原因は？回避策は？>と質問。ベテランノウハウの形式知化。シフト生成不可。計画時の留意点確認用。45分完了。※今回は参考情報。\n【演習】ダミー記録+トラブル→ノウハウ→新月計画の留意点。", "rag_area": "業務効率化", "industry": "小売店舗シフト（RT） / 薬局シフト（HC） / 食品倉庫シフト（FD）", "mapping": "HC-15"}, {"no": 20, "name": "契約書ドラフト作成・差分検知", "pattern": "D. オペレーション最適化", "track": "中上級", "efficiency": "●", "analysis": "", "strategy": "", "issue": "・案件ごとに契約書を新規起草する機会が多く（年間30〜50件）、微修正と整合確認に時間がかかる。1件あたり4〜6時間。\n・条文のリスク観点（責任範囲、解除条件、知財、秘密保持、損害賠償上限等）を漏れなく確認したいが、チェックが属人的。\n・過去契約との差分確認が手作業（赤ペン/比較ツール）で、見落としが懸念される。\n・類型（事業譲渡/株式取得/業務委託/秘密保持等）ごとの標準条文が整備されていない。", "tobe": "過去契約書（類型別に各10件以上）から抽出された条文パターン（標準条文・リスク条項チェックリスト20項目以上）に基づきドラフトが自動生成される。新旧契約間の差分が自動検出され、リスク条項の変更箇所がハイライト。作成時間4〜6時間→1〜2時間に短縮。法務レビューの品質と速度が向上している状態。", "group": "D. データ駆動型オペレーション最適化", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "◎", "chat_sol": "【到達率40%】Claude Sonnetに過去契約書PDF3件（同類型、各10〜15頁）を添付し<条文構成パターン・リスク条項（責任範囲/解除/知財/秘密保持/損害賠償等）のチェックリストを作成して>と指示。新規要件で<ドラフトをMarkdown形式で作成して>と指示。CopilotよりPDF読取精度が高く、条文間の整合性チェックも可能。Markdown出力だがWord変換で対応。長大契約（20頁超）はOpus推奨。45分完了。\n【演習】ダミー契約書3件→パターン→新規ドラフト作成。", "chat_area": "業務効率化", "agent_sol": "【到達率65%】Step1（10分）: GitHubに過去契約書PDF3件（同類型、各8〜10頁、条文番号付き、軽量版）をアップロード。<3件を比較し、①条文構成パターン（セクション構造・標準条文）、②リスク条項チェックリスト（責任範囲/解除/知財/秘密保持/損害賠償等20項目）、③3件間で異なる条文の差分パターンをCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新規案件の要件シート＋参考契約書1件を追加し<CLAUDE.mdのパターンで契約書ドラフトを作成し、1つのMarkdownファイル『契約書ドラフト_[案件名]_人間向け.md』として保存してください。ドラフト本文＋参考契約書との差分をリスク条項ごとに一覧化＋過去3件との比較を含めてください。Pythonスクリプトは作成しないでください>と指示。到達率65%：条文構造と標準パターンは高精度、業種特有の特殊条項は手動確認要。45分完了。\n【演習】ダミー契約書3件→パターン定義→新規のドラフト+差分検出。", "agent_area": "業務効率化", "rag_sol": "【到達率50%】過去契約書・修正履歴・法務レビュー指摘3件をNotebookLMにアップし<頻出するリスク条項と修正パターンは？>と質問。法務ナレッジ取得。差分検知は不可だがチェックリストとして有効。45分完了。※今回は参考情報。\n【演習】ダミー契約書+修正履歴3件→リスクパターン→新規のチェック。", "rag_area": "業務効率化", "industry": "小売事業会社契約（RT） / 投資契約（AD） / 業務委託契約", "mapping": "RT-9"}, {"no": 21, "name": "経営会議・取締役会向けスライド作成", "pattern": "E. 資料作成・ドキュメント生成", "track": "初級中級", "efficiency": "●", "analysis": "", "strategy": "", "issue": "・骨子作りの打合せで意見が散らばりやすく、合意形成に時間がかかる。骨子確定まで平均2〜3回のすり合わせ。\n・上位層レビューで修正指示が入り、骨子の作り直しが発生する頻度が約4割。\n・過去資料の再利用が進まず、ゼロからスライドを作り直す非効率が生じる。\n・資料受領から事前説明までの時間が短く（通常2〜3営業日）、要点整理がタイト。", "tobe": "過去の経営会議・取締役会スライドのパターン（構成・グラフ配置・コメント方法・論点の優先順位付け方法）に準拠した資料が、骨子テキスト入力だけで自動生成される。上位層が求める形式・品質が標準化され、修正指示による手戻りが4割→1割以下に低減。再利用可能なテンプレートライブラリが整備されている状態。", "group": "E. 資料作成・ドキュメント生成", "chat_fit": "◎", "agent_fit": "○", "rag_fit": "○", "chat_sol": "【到達率50%】Claude Sonnetに過去スライドPDF3件（各10〜15枚、経営会議/取締役会/対外説明）を添付し<①構成パターン（セクション順序・枚数配分）、②グラフ・表の配置パターン、③コメント記載方法（数値→要因→示唆の流れ）を抽出して>と指示→パターン取得。骨子テキスト（A4 1枚のメモ）を渡し<このパターンで、スライド構成（各スライドのタイトル・掲載内容・グラフ種類）を1つのMarkdownファイルで作成して>と指示。Claudeはスライド構成案をMarkdownで出力（PPTX変換は別途必要）。論点の構造化と優先順位付けの品質が強み。複雑な論点整理にはOpus推奨（トークン消費注意）。45分完了。\n【演習】ダミースライドPDF3件→パターン→骨子テキストからスライド構成案生成。", "chat_area": "業務効率化", "agent_sol": "【参考：到達率55%】※初級中級タスクのためClaude Codeは演習対象外。参考情報として：Sonnetで過去スライドから構成・論点配置パターンをCLAUDE.mdに定義（Step1）。骨子からMarkdown構成を生成（Step2）。PPTX変換は別途必要。45分完了。", "agent_area": "業務効率化", "rag_sol": "【到達率40%】過去スライド・レビュー議事録3件をNotebookLMにアップし<高評価スライドの共通特徴は？修正が入ったスライドの問題点は？>と質問。プレゼンパターン取得。スライド生成不可だが論点設計の参考として活用。45分完了。※今回は参考情報。\n【演習】ダミースライド+議事録3件→パターン→新資料の論点設計。", "rag_area": "業務効率化", "industry": "小売事業報告スライド（RT） / 食品部門報告スライド（FD） / 管理部門報告（AD）", "mapping": "FD-3, FD-9 / AD-15 / RT-8, RT-23"}, {"no": 22, "name": "商談・相場資料の自動作成", "pattern": "E. 資料作成・ドキュメント生成", "track": "初級中級", "efficiency": "●", "analysis": "", "strategy": "", "issue": "・海外相場情報（英語中心、畜産/穀物/為替等）の収集・日本語要約・定型資料化に1回あたり2〜3時間を要する。週次更新。\n・類似提案の再利用が進まず、都度ゼロから骨子を組み立てがち。年間50〜80件の商談資料を作成。\n・情報収集と可視化加工（グラフ・表の作成）で商談準備がタイトになり、提案内容の検討に時間が割けない。\n・レポートの配色・フォーマットが担当者ごとに異なり、ブランド統一性が弱い。", "tobe": "マーケット情報の収集・日本語要約・グラフ化・定型フォーマット出力が自動化され、商談準備工数が2〜3時間→30分以内に短縮。過去の類似提案が構造化されて再利用可能に整理。フォーマットが標準化されブランド統一性が確保されている状態。", "group": "E. 資料作成・ドキュメント生成", "chat_fit": "◎", "agent_fit": "○", "rag_fit": "○", "chat_sol": "【到達率45%】Claude Sonnetに過去商談資料PDF3件を添付し<①構成パターン（導入部→市場概況→提案→条件の流れ）、②データ提示方法（グラフ種類・表レイアウト）、③顧客向けコメントの型を抽出して>と指示。新規データ（相場数値・顧客要件）で<このパターンで商談資料を1つのMarkdownファイルで作成して。英語の相場情報は日本語に要約して>と指示。リサーチツールは使えないが、Claude自身の知識で市場背景の補完が可能。英日翻訳・要約の品質が強み。45分完了。\n【演習】ダミー商談資料3件→パターン→新規データで作成。", "chat_area": "業務効率化", "agent_sol": "【参考：到達率55%】※初級中級タスクのためClaude Codeは演習対象外。参考情報として：Sonnetで過去資料から構成テンプレート・データ表示パターンをCLAUDE.mdに定義。新規データで適用。Markdown出力。45分完了。", "agent_area": "業務効率化", "rag_sol": "【到達率40%】過去商談資料・市場レポート3件をNotebookLMにアップし<有効なデータ提示方法は？顧客に刺さった表現は？>と質問。成功パターン取得。資料生成不可だが構成設計に有効。45分完了。※今回は参考情報。\n【演習】ダミー資料3件→提示パターン→新規の構成設計。", "rag_area": "業務効率化", "industry": "市況商品レポート（FD） / 食品商談資料（FD） / 店舗レビューレポート（RT）", "mapping": "FD-19, FD-22 / RT-22"}, {"no": 23, "name": "全社戦略情報の整理・ドラフト作成", "pattern": "E. 資料作成・ドキュメント生成", "track": "初級中級", "efficiency": "●", "analysis": "", "strategy": "●", "issue": "・統括責任者向けの定例情報を整理し、主要事業（5〜8事業）の状況を継続的に把握する必要があるが、情報源がメール・打合せメモ・報告書に分散。\n・各事業部との打合せで得た情報の蓄積・構造化が追いつかず、記憶とメモに依存した資料作成になりがち。\n・説明機会のたびにすり合わせ回数が増え（平均2回/件）、戦略の言語化と共通認識の更新に時間がかかる。", "tobe": "分散した戦略情報（事業別の現状・課題・打ち手・KPI）が構造化フレームワークに基づき蓄積され、説明機会に応じたドラフト（経営向け/部門向け/対外向け）が自動生成される。すり合わせ回数2回→1回以下に短縮。共通認識の更新と戦略の言語化が効率化されている状態。", "group": "E. 資料作成・ドキュメント生成", "chat_fit": "◎", "agent_fit": "○", "rag_fit": "○", "chat_sol": "【到達率50%】Claude Sonnetに過去戦略資料・打合せメモ3件を添付し<①構成パターン（セクション・論点の配置）、②事業別の論点整理フレームワーク、③説明の粒度（経営向け/部門向けの違い）を抽出して>と指示。新規テーマで<このフレームワークでドラフトを1つのMarkdownファイルで作成して>と指示。フレームワーク抽出と論点構造化の品質が強み。3〜4頁相当のドラフト生成が可能。Opusに切替えると戦略的示唆の深さが向上するがトークン消費大。45分完了。\n【演習】ダミー戦略資料3件→パターン→新規テーマでドラフト。", "chat_area": "業務効率化・事業構想", "agent_sol": "【参考：到達率55%】※初級中級タスクのためClaude Codeは演習対象外。参考情報として：Sonnetで過去資料から戦略情報の構造化フレームワークをCLAUDE.mdに定義。新規テーマでフレームワーク適用。45分完了。", "agent_area": "業務効率化・事業構想", "rag_sol": "【到達率45%】過去戦略資料・打合せ議事録5件をNotebookLMにアップし<主要事業の現状認識と未解決の論点は？>と質問。引用付きで戦略ナレッジ取得。ドラフト生成不可だが論点網羅に有効。45分完了。※今回は参考情報。\n【演習】ダミー資料+議事録5件→論点ナレッジ→新規の構成設計。", "rag_area": "業務効率化・事業構想", "industry": "全社戦略資料 / 部門戦略資料", "mapping": "AD-16, AD-1"}, {"no": 24, "name": "人材マッチング・活躍度予測", "pattern": "F. 人材管理（データ駆動型）", "track": "中上級", "efficiency": "", "analysis": "●", "strategy": "●", "issue": "・経験・スキル・資格の組合せ探索を人手で行うと網羅が難しく、候補抽出に時間がかかる。年間の採用/配置検討は50〜80件規模。\n・面接の質問内容と評価観点が面接官ごとに統一されず、判断が属人的。面接官間の評価一致率は約60%。\n・面接官ごとの評価の甘辛（厳しい/甘い傾向）が見えず、選考精度を振り返る指標がない。\n・採用/配置判断が経験則に偏り、入社1年以内の離職兆候を早期に捉えられない。", "tobe": "経歴/スキル/資格データに基づくマッチングモデルが構築され、<この候補者がこのポジションで活躍する可能性>がスコア化される。面接評価が標準化（評価項目5軸×5段階）され、面接官の甘辛分析が可能。活躍度/離職リスクの予測に基づくデータ駆動型の人材管理が実現。面接官間の評価一致率60%→80%以上に向上している状態。", "group": "F. 人材管理（データ駆動型）", "chat_fit": "○", "agent_fit": "◎", "rag_fit": "○", "chat_sol": "【到達率35%】Claude Sonnetに過去の人材データCSV2件（経歴/スキル/評価/在籍期間/離職有無、各20名分）を添付し<活躍者と離職者の共通特徴を抽出して>と指示。Copilotより分析精度が高く、パターンの言語化品質が向上。ただし予測モデルの厳密な構築はClaude Codeに劣る。\n【演習】ダミー人材CSV（30名分）→特徴抽出→新候補5名に適用。", "chat_area": "データ分析・事業構想", "agent_sol": "【到達率65%】Step1（10分）: GitHubに過去人材データCSV（5名分、列：氏名/年齢/経歴年数/保有資格/前職カテゴリ/面接スコア5軸/入社後評価/在籍月数/離職有無）をアップロード。<5名のデータを分析し、①活躍パターン（入社後評価が高い人の経歴/スキル/面接スコアの特徴）、②離職リスクパターン、③面接官別の甘辛傾向、④マッチングスコアの算出ロジックをCLAUDE.mdに定義。Pythonスクリプトは作成しないでください>と指示。Step2（10分）: 新候補者CSV（5名、面接スコア付き・配置先未定）を追加し<CLAUDE.mdのロジックでマッチングスコア算出＋活躍度/離職リスク予測を行い、1つのMarkdownファイル『人材マッチング_[対象期]_人間向け.md』として保存してください。ランキング表＋過去5名との比較を含めてください。Pythonスクリプトは作成しないでください>と指示。5名規模は研修用の軽量版、デスクトップ版なら50名以上も処理可能と説明。到達率65%：経歴/スキル軸の分析は高精度、ソフトスキルや組織文化適合の予測は限定的。45分完了。\n【演習】ダミー人材CSV5名→パターン定義→新候補5名のマッチング。", "agent_area": "データ分析・事業構想", "rag_sol": "【到達率40%】過去面接記録・評価シート・離職者ヒアリング3件をNotebookLMにアップし<活躍者と離職者の共通パターンは？面接で見抜けなかったポイントは？>と質問。引用付きで人材ナレッジ取得。予測計算不可だが観点整理に有効。45分完了。※今回は参考情報。\n【演習】ダミー面接記録3件→パターン→新候補の観点チェック。", "rag_area": "データ分析・事業構想", "industry": "管理部門固有（HR Analytics）", "mapping": "AD-23〜25, AD-33"}, {"no": 25, "name": "週次進捗管理・会議運営支援", "pattern": "G. 会議・プロジェクト管理", "track": "初級中級", "efficiency": "●", "analysis": "", "strategy": "", "issue": "・毎週の定例（参加者5〜10名）でタスクを棚卸ししているが、記録が担当者依存で抜け漏れが出やすい。\n・オンライン会議の議事メモが属人的で、整形と確認に毎回30〜60分を要している。\n・「先週の未完了タスク」の追跡が手動で、同じタスクが複数週にわたり放置されるケースが月に3〜5件発生。\n・事後アンケートの集計が作業に留まり、要因分析や次回への打ち手が十分に回らない。", "tobe": "週次の進捗資料が過去の記録から抽出されたテンプレート・タスク分類体系に基づいて自動整形される。未完了タスクが自動追跡され、2週以上放置されたタスクにはアラートが付く。整形時間30〜60分→10分以内に短縮。抜け漏れが構造的に防止されている状態。", "group": "G. 会議・プロジェクト管理", "chat_fit": "◎", "agent_fit": "○", "rag_fit": "○", "chat_sol": "【到達率50%】Claude Sonnetに過去進捗資料3週分（各2頁PDF、タスク一覧+ステータス+担当+期限）を添付し<①テンプレート構成（セクション・タスク分類・ステータス区分）、②タスク記載粒度のパターン、③未完了タスクの追跡ルールを抽出して>と指示。今週の議事メモ（箇条書きテキスト）を渡し<このパターンで進捗資料を1つのMarkdownファイルで作成して。先週の未完了タスクも過去データから抽出して併記して>と指示。PDF読取精度が高く、3週分の未完了タスク追跡も正確。Markdown出力でWord変換は別途必要だが、論点の構造化品質が強み。45分完了。\n【演習】ダミー進捗3週→テンプレート→今週メモから進捗資料生成。", "chat_area": "業務効率化", "agent_sol": "【参考：到達率60%】※初級中級タスクのためClaude Codeは演習対象外。参考情報として：Sonnetで過去進捗からテンプレート・タスク分類をCLAUDE.mdに定義。議事メモから自動整形＋未完了追跡。45分完了。", "agent_area": "業務効率化", "rag_sol": "【到達率45%】過去進捗・議事録8週分をNotebookLMにアップし<繰り返し未完了のタスクパターンは？放置の原因は？>と質問。構造的課題が引用付きで可視化。ノートブック共有でチーム全員がアクセス可能。45分完了。※今回は参考情報。\n【演習】ダミー議事録4週→停滞パターン→改善アクション提案。", "rag_area": "業務効率化", "industry": "週次進捗 / 会議メモ / アンケート集計", "mapping": "HC-17 / FD-1 / AD-13, AD-17"}];
+
+// ---- 状態 ----
+const state = {
+  selected: null,
+  search: '',
+  patternFilter: 'all',
+  view: 'detail'
+};
+
+// ---- フィット変換 ----
+function fitLevel(v) {
+  if (v === '◎') return { level: 'excellent', score: 3 };
+  if (v === '○') return { level: 'good', score: 2 };
+  if (v === '△') return { level: 'okay', score: 1 };
+  return { level: 'poor', score: 0 };
+}
+
+// ---- パターンユニーク ----
+const PATTERNS = [...new Set(DATA.map(d => d.pattern))].sort();
+const patternColors = {};
+const palette = ['#b8543d', '#8b3d2a', '#b8893f', '#7a3e9d', '#2563a8', '#2d7a4f', '#a04040', '#3d4556', '#8b6914'];
+PATTERNS.forEach((p, i) => patternColors[p] = palette[i % palette.length]);
+
+// ---- フィルターチップ初期化 ----
+function renderFilters() {
+  const el = document.getElementById('filters');
+  el.innerHTML = '';
+  const all = document.createElement('button');
+  all.className = 'chip' + (state.patternFilter === 'all' ? ' active' : '');
+  all.textContent = 'すべて';
+  all.onclick = () => { state.patternFilter = 'all'; renderFilters(); renderList(); };
+  el.appendChild(all);
+  PATTERNS.forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (state.patternFilter === p ? ' active' : '');
+    const label = p.split('.')[0] + '.';
+    b.innerHTML = `<span class="dot" style="background:${patternColors[p]}"></span>${label}`;
+    b.title = p;
+    b.onclick = () => { state.patternFilter = p; renderFilters(); renderList(); };
+    el.appendChild(b);
+  });
+}
+
+// ---- リストフィルタ ----
+function filteredData() {
+  const q = state.search.toLowerCase().trim();
+  return DATA.filter(d => {
+    if (state.patternFilter !== 'all' && d.pattern !== state.patternFilter) return false;
+    if (!q) return true;
+    const hay = [d.name, d.pattern, d.issue, d.tobe, d.chat_sol, d.agent_sol, d.rag_sol, d.industry].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+}
+
+// ---- サイドバーリスト描画 ----
+function renderList() {
+  const el = document.getElementById('list');
+  const filtered = filteredData();
+  document.getElementById('stat-visible').textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="no-results">該当するユースケースがありません</div>';
+    return;
+  }
+
+  // グループ化
+  const groups = {};
+  filtered.forEach(d => {
+    if (!groups[d.group]) groups[d.group] = [];
+    groups[d.group].push(d);
+  });
+
+  let html = '';
+  Object.keys(groups).sort().forEach(g => {
+    html += `<div class="group-header">${escapeHtml(g)}</div>`;
+    groups[g].forEach(d => {
+      const active = state.selected === d.no ? ' active' : '';
+      const cf = fitLevel(d.chat_fit), af = fitLevel(d.agent_fit), rf = fitLevel(d.rag_fit);
+      html += `
+        <div class="uc-item${active}" data-no="${d.no}">
+          <div class="uc-no">${String(d.no).padStart(2,'0')}</div>
+          <div class="uc-body">
+            <div class="uc-name">${escapeHtml(d.name)}</div>
+            <div class="uc-meta">
+              <span class="uc-pattern">${escapeHtml(d.pattern.split('.')[0])}・${escapeHtml(d.track)}</span>
+              <span class="fit-marks">
+                <span class="fit-pill chat${cf.score < 2 ? ' dim' : ''}" title="Chat: ${d.chat_fit}">C ${d.chat_fit || '-'}</span>
+                <span class="fit-pill agent${af.score < 2 ? ' dim' : ''}" title="Agent: ${d.agent_fit}">A ${d.agent_fit || '-'}</span>
+                <span class="fit-pill rag${rf.score < 2 ? ' dim' : ''}" title="RAG: ${d.rag_fit}">R ${d.rag_fit || '-'}</span>
+              </span>
+            </div>
+          </div>
+        </div>`;
+    });
+  });
+  el.innerHTML = html;
+
+  el.querySelectorAll('.uc-item').forEach(it => {
+    it.onclick = () => selectCase(parseInt(it.dataset.no));
+  });
+}
+
+// ---- 詳細描画 ----
+function selectCase(no) {
+  state.selected = no;
+  state.view = 'detail';
+  document.querySelectorAll('.vtab').forEach(t => t.classList.toggle('active', t.dataset.view === 'detail'));
+  document.getElementById('welcome').classList.remove('active');
+  document.getElementById('matrix').classList.remove('active');
+  document.getElementById('detail').classList.add('active');
+
+  renderList();
+  renderDetail();
+
+  // モバイル: サイドバーを閉じる
+  if (window.innerWidth <= 900) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('backdrop').classList.remove('show');
+  }
+  // 先頭へスクロール
+  document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderDetail() {
+  const d = DATA.find(x => x.no === state.selected);
+  if (!d) return;
+  const el = document.getElementById('detail');
+
+  const cats = [];
+  if (d.efficiency === '●') cats.push('業務効率化');
+  if (d.analysis === '●') cats.push('データ分析');
+  if (d.strategy === '●') cats.push('事業構想');
+
+  const cf = fitLevel(d.chat_fit), af = fitLevel(d.agent_fit), rf = fitLevel(d.rag_fit);
+
+  el.innerHTML = `
+    <div class="detail-head">
+      <div class="breadcrumb">${escapeHtml(d.group)}<span class="sep">▸</span>${escapeHtml(d.pattern)}</div>
+      <div class="detail-no">USE CASE ${String(d.no).padStart(2,'0')} / 25</div>
+      <h2 class="detail-title">${escapeHtml(d.name)}</h2>
+      <div class="detail-badges">
+        <span class="badge track">TRACK: ${escapeHtml(d.track)}</span>
+        ${cats.map(c => `<span class="badge cat">${escapeHtml(c)}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="section-2col">
+      <div class="card issue">
+        <div class="card-label">AS IS</div>
+        <h3>現状の業務課題</h3>
+        <div class="card-body">${escapeHtml(d.issue)}</div>
+      </div>
+      <div class="card tobe">
+        <div class="card-label">TO BE</div>
+        <h3>ありたい姿</h3>
+        <div class="card-body">${escapeHtml(d.tobe)}</div>
+      </div>
+    </div>
+
+    <div class="solutions">
+      <h2 class="sec-title"><span class="sec-num">§ 01</span>AI解決策の比較</h2>
+      <div class="sol-grid">
+        <div class="sol-card chat">
+          <div class="sol-header">
+            <div>
+              <div class="sol-name">AIチャット</div>
+              <div class="sol-type">CLAUDE CHAT</div>
+            </div>
+            <div style="text-align:right">
+              <div class="sol-fit ${cf.level}">${d.chat_fit || '—'}</div>
+              <div class="sol-fit-lbl">FIT</div>
+            </div>
+          </div>
+          <div class="sol-body">${escapeHtml(d.chat_sol) || '<span style="color:var(--ink-mute)">情報なし</span>'}</div>
+          ${d.chat_area ? `<div class="sol-area">活用領域<strong>${escapeHtml(d.chat_area)}</strong></div>` : ''}
+        </div>
+
+        <div class="sol-card agent">
+          <div class="sol-header">
+            <div>
+              <div class="sol-name">AIエージェント</div>
+              <div class="sol-type">CLAUDE CODE</div>
+            </div>
+            <div style="text-align:right">
+              <div class="sol-fit ${af.level}">${d.agent_fit || '—'}</div>
+              <div class="sol-fit-lbl">FIT</div>
+            </div>
+          </div>
+          <div class="sol-body">${escapeHtml(d.agent_sol) || '<span style="color:var(--ink-mute)">情報なし</span>'}</div>
+          ${d.agent_area ? `<div class="sol-area">活用領域<strong>${escapeHtml(d.agent_area)}</strong></div>` : ''}
+        </div>
+
+        <div class="sol-card rag">
+          <div class="sol-header">
+            <div>
+              <div class="sol-name">RAG</div>
+              <div class="sol-type">NOTEBOOKLM</div>
+            </div>
+            <div style="text-align:right">
+              <div class="sol-fit ${rf.level}">${d.rag_fit || '—'}</div>
+              <div class="sol-fit-lbl">FIT</div>
+            </div>
+          </div>
+          <div class="sol-body">${escapeHtml(d.rag_sol) || '<span style="color:var(--ink-mute)">情報なし</span>'}</div>
+          ${d.rag_area ? `<div class="sol-area">活用領域<strong>${escapeHtml(d.rag_area)}</strong></div>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="solutions">
+      <h2 class="sec-title"><span class="sec-num">§ 02</span>関連情報</h2>
+      <dl class="meta-grid">
+        <div class="meta-item">
+          <dt>業界バリエーション</dt>
+          <dd>${escapeHtml(d.industry) || '—'}</dd>
+        </div>
+        <div class="meta-item">
+          <dt>元ユースケース（部門横断マッピング）</dt>
+          <dd style="font-family:var(--mono);font-size:11px">${escapeHtml(d.mapping) || '—'}</dd>
+        </div>
+      </dl>
+    </div>
+  `;
+}
+
+// ---- マトリクス描画 ----
+function renderMatrix() {
+  const el = document.getElementById('matrix');
+  const filtered = filteredData();
+
+  let rows = filtered.map(d => {
+    const cf = fitLevel(d.chat_fit), af = fitLevel(d.agent_fit), rf = fitLevel(d.rag_fit);
+    const active = state.selected === d.no ? ' active' : '';
+    return `
+      <tr data-no="${d.no}" class="${active}">
+        <td class="center mat-no">${String(d.no).padStart(2,'0')}</td>
+        <td>
+          <div class="mat-name">${escapeHtml(d.name)}</div>
+          <div class="mat-pattern">${escapeHtml(d.pattern)}</div>
+        </td>
+        <td>${escapeHtml(d.track)}</td>
+        <td class="center fit-cell ${cf.level}">${d.chat_fit || '—'}</td>
+        <td class="center fit-cell ${af.level}">${d.agent_fit || '—'}</td>
+        <td class="center fit-cell ${rf.level}">${d.rag_fit || '—'}</td>
+        <td>${escapeHtml(d.industry) || '—'}</td>
+      </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="matrix-intro">
+      <strong>${filtered.length}件</strong>のユースケースを一覧表示中。行をクリックすると詳細を表示します。
+      <span style="color:var(--ink-mute);margin-left:12px">◎=最適 / ○=適する / △=限定的</span>
+    </div>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th class="center" style="width:50px">No.</th>
+            <th>ユースケース名 / 業務パターン</th>
+            <th style="width:80px">トラック</th>
+            <th class="center" style="width:70px" title="AIチャット適合度">Chat</th>
+            <th class="center" style="width:70px" title="AIエージェント適合度">Agent</th>
+            <th class="center" style="width:70px" title="RAG適合度">RAG</th>
+            <th>業界バリエーション</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+
+  el.querySelectorAll('tbody tr').forEach(tr => {
+    tr.onclick = () => selectCase(parseInt(tr.dataset.no));
+  });
+}
+
+// ---- ビュー切替 ----
+document.querySelectorAll('.vtab').forEach(tab => {
+  tab.onclick = () => {
+    const v = tab.dataset.view;
+    state.view = v;
+    document.querySelectorAll('.vtab').forEach(t => t.classList.toggle('active', t === tab));
+    document.getElementById('welcome').classList.remove('active');
+    document.getElementById('detail').classList.remove('active');
+    document.getElementById('matrix').classList.remove('active');
+    if (v === 'detail') {
+      if (state.selected) {
+        document.getElementById('detail').classList.add('active');
+        renderDetail();
+      } else {
+        document.getElementById('welcome').classList.add('active');
+      }
+    } else if (v === 'matrix') {
+      document.getElementById('matrix').classList.add('active');
+      renderMatrix();
+    }
+    document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });
+  };
+});
+
+// ---- 検索 ----
+document.getElementById('search').addEventListener('input', e => {
+  state.search = e.target.value;
+  renderList();
+  if (state.view === 'matrix') renderMatrix();
+});
+
+// ---- ハンバーガー ----
+document.getElementById('hamburger').onclick = () => {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('backdrop');
+  const open = sb.classList.toggle('open');
+  bd.classList.toggle('show', open);
+};
+document.getElementById('backdrop').onclick = () => {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('backdrop').classList.remove('show');
+};
+
+// ---- キーボードショートカット ----
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) {
+    e.preventDefault();
+    document.getElementById('search').focus();
+  }
+  if (e.key === 'Escape') {
+    document.getElementById('search').value = '';
+    state.search = '';
+    renderList();
+    if (state.view === 'matrix') renderMatrix();
+  }
+  // j/k でリスト移動
+  if ((e.key === 'j' || e.key === 'k') && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) {
+    const filtered = filteredData();
+    if (filtered.length === 0) return;
+    const idx = filtered.findIndex(d => d.no === state.selected);
+    let next = e.key === 'j' ? (idx < 0 ? 0 : Math.min(filtered.length - 1, idx + 1)) : Math.max(0, idx - 1);
+    selectCase(filtered[next].no);
+  }
+});
+
+// ---- ユーティリティ ----
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+// ---- 初期化 ----
+document.getElementById('stat-total').textContent = DATA.length;
+document.getElementById('stat-pattern').textContent = PATTERNS.length;
+renderFilters();
+renderList();
+</script>
+</body>
+</html>
